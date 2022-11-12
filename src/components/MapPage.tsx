@@ -3,7 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import {Feature, Geolocation, View} from "ol";
+import {Feature, Geolocation, Tile, View} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
@@ -149,7 +149,14 @@ export default function MapPage(props: {id: string}) {
     }
     if (!tileLayerRef.current) {
       tileLayerRef.current = new TileLayer({
-        source: new OSM()
+        source: new OSM({
+          crossOrigin: 'anonymous',
+          tileLoadFunction: (imageTile, src) => {
+            const {pathname} = new URL(src);
+            // @ts-ignore
+            imageTile.getImage().src = `https://proxy.notemapp.com${pathname}`;
+          }
+        })
       });
     }
 
