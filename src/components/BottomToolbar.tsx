@@ -1,7 +1,7 @@
 import {DrawType} from "../core/DrawType";
 import {useState} from "react";
 
-export function Toolbar(props: {
+export function BottomToolbar(props: {
   drawType: DrawType,
   freeHand: boolean,
   onFreeHandToggle: () => void,

@@ -3,13 +3,13 @@ import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import {View} from "ol";
+import {Feature, Geolocation, View} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
 import {createStore, get, set, UseStore} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
-import {Toolbar} from "./Toolbar";
+import {BottomToolbar} from "./BottomToolbar";
 import {DrawType} from "../core/DrawType";
 import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import {DB_NOTES, DB_NOTES_PREFS, STORE_NOTES, STORE_NOTES_PREFS} from "../core/Keys";
@@ -18,6 +18,10 @@ import {createBox, DrawEvent} from "ol/interaction/Draw";
 import {get as getProjection} from "ol/proj";
 import "ol/ol.css";
 import style from "./MapPage.module.css";
+import SideToolbar from "./SideToolbar";
+import {Fill, Stroke, Style} from "ol/style";
+import CircleStyle from "ol/style/Circle";
+import Point from 'ol/geom/Point';
 
 export default function MapPage(props: {id: string}) {
 
@@ -206,10 +210,55 @@ export default function MapPage(props: {id: string}) {
 
   }, []);
 
+  const positionFeature = useRef<Feature>();
+  useEffect(() => {
+    if (positionFeature.current) return;
+    positionFeature.current = new Feature();
+    positionFeature.current.setStyle(
+      new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: '#3399CC',
+          }),
+          stroke: new Stroke({
+            color: '#fff',
+            width: 2,
+          }),
+        }),
+      })
+    );
+  }, []);
+
+  const geolocation = useRef<Geolocation>();
+  const onLocate = () => {
+
+    if (!geolocation.current && positionFeature.current) {
+
+      vectorSourceRef.current?.addFeature(positionFeature.current);
+
+      geolocation.current = new Geolocation({
+        trackingOptions: {
+          enableHighAccuracy: true,
+        },
+        projection: mapRef.current?.getView().getProjection()
+      });
+
+      geolocation.current.setTracking(true);
+
+      geolocation.current.on('change:position', function () {
+        const coordinates = geolocation.current?.getPosition();
+        positionFeature.current?.setGeometry(coordinates ? new Point(coordinates) : undefined);
+      });
+
+    }
+
+  }
+
   return (
     <div>
       <div id="map" className={style.map}></div>
-      <Toolbar
+      <BottomToolbar
         drawType={drawTypeRef.current}
         freeHand={freeHandRef.current}
         onDrawTypeChange={onDrawTypeChange}
@@ -217,6 +266,7 @@ export default function MapPage(props: {id: string}) {
         onUndo={onUndo}
         onRedo={onRedo}
       />
+      <SideToolbar onLocate={onLocate} />
     </div>
   );
 
