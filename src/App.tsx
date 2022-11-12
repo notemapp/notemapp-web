@@ -8,12 +8,12 @@ import {View} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
-import {createStore, get, set, UseStore} from 'idb-keyval';
+import {createStore, get, set, update, UseStore} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {Toolbar} from "./components/Toolbar";
 import {DrawType} from "./core/DrawType";
 import UndoRedo from 'ol-ext/interaction/UndoRedo';
-import {DB_NOTES, STORE_NOTES} from "./core/Keys";
+import {DB_NOTES, DB_NOTES_INFO, STORE_NOTES, STORE_NOTES_INFO} from "./core/Keys";
 import log from "./core/Logger";
 import {createBox, DrawEvent} from "ol/interaction/Draw";
 import {get as getProjection} from "ol/proj";
@@ -23,6 +23,7 @@ function App() {
   const id = 'my-note-id';
 
   const notesStoreRef = useRef<UseStore>();
+  const notesInfoStoreRef = useRef<UseStore>();
   const mapRef = useRef<Map>();
   const vectorSourceRef = useRef<VectorSource>();
 
@@ -101,6 +102,8 @@ function App() {
     // Initialize notes store
     if (!notesStoreRef.current)
       notesStoreRef.current = createStore(DB_NOTES, STORE_NOTES);
+    if (!notesInfoStoreRef.current)
+      notesInfoStoreRef.current = createStore(DB_NOTES_INFO, STORE_NOTES_INFO);
 
     // Initialize vector source
     if (!vectorSourceRef.current) {
@@ -155,6 +158,24 @@ function App() {
           zoom: 4,
           extent: extent
         })
+      });
+
+      // Save map view on move end
+      mapRef.current.on('moveend', () => {
+        const currentView = {
+          center: mapRef.current?.getView().getCenter(),
+          zoom: mapRef.current?.getView().getZoom()
+        };
+        set(id, JSON.stringify(currentView), notesInfoStoreRef.current).then(() => log("Local note info updated"));
+      });
+      // Restore previous map view
+      get(id, notesInfoStoreRef.current).then((view: string) => {
+        if (view) {
+          const previousView = JSON.parse(view);
+          mapRef.current?.getView().setCenter(previousView.center);
+          mapRef.current?.getView().setZoom(previousView.zoom);
+          log("Restored previous view");
+        }
       });
 
     }
