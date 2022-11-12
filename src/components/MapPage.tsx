@@ -151,11 +151,13 @@ export default function MapPage(props: {id: string}) {
       tileLayerRef.current = new TileLayer({
         source: new OSM({
           crossOrigin: 'anonymous',
+          /*
           tileLoadFunction: (imageTile, src) => {
             const {pathname} = new URL(src);
             // @ts-ignore
             imageTile.getImage().src = `https://proxy.notemapp.com${pathname}`;
           }
+          */
         })
       });
     }
