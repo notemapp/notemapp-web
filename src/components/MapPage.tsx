@@ -31,8 +31,10 @@ export default function MapPage(props: {id: string}) {
   const mapRef = useRef<Map>();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const vectorSourceRef = useRef<VectorSource>();
+  const locationSourceRef = useRef<VectorSource>();
 
   const vectorLayerRef = useRef<VectorLayer<VectorSource>>();   // Layer for features
+  const locationLayerRef = useRef<VectorLayer<VectorSource>>(); // Layer for location
   const tileLayerRef = useRef<TileLayer<OSM>>();                // Layer for tiles
 
   const drawInteractionRef = useRef<Draw>();
@@ -125,11 +127,19 @@ export default function MapPage(props: {id: string}) {
       });
 
     }
+    if (!locationSourceRef.current) {
+      locationSourceRef.current = new VectorSource({wrapX: false});
+    }
 
     // Initialize layers
     if (!vectorLayerRef.current) {
       vectorLayerRef.current = new VectorLayer({
         source: vectorSourceRef.current
+      });
+    }
+    if (!locationLayerRef.current) {
+      locationLayerRef.current = new VectorLayer({
+        source: locationSourceRef.current
       });
     }
     if (!tileLayerRef.current) {
@@ -158,7 +168,7 @@ export default function MapPage(props: {id: string}) {
       // Instantiate map
       mapRef.current = new Map({
         target: mapContainerRef.current,
-        layers: [tileLayerRef.current, vectorLayerRef.current],
+        layers: [tileLayerRef.current, vectorLayerRef.current, locationLayerRef.current],
         view: new View({
           center: [-11000000, 4600000],
           zoom: 4,
@@ -206,6 +216,7 @@ export default function MapPage(props: {id: string}) {
 
   }, []);
 
+  // Geolocation:
   const positionFeature = useRef<Feature>();
   useEffect(() => {
     if (positionFeature.current) return;
@@ -227,11 +238,12 @@ export default function MapPage(props: {id: string}) {
   }, []);
 
   const geolocation = useRef<Geolocation>();
+
   const onLocate = () => {
 
     if (!geolocation.current && positionFeature.current) {
 
-      vectorSourceRef.current?.addFeature(positionFeature.current);
+      locationSourceRef.current?.addFeature(positionFeature.current);
 
       geolocation.current = new Geolocation({
         trackingOptions: {
