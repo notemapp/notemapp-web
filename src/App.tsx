@@ -1,13 +1,16 @@
 import './App.css'
 import MapPage from "./components/MapPage";
 import log from "./core/Logger";
+import {StorageContextProvider} from "./components/StorageContext";
 
 function App() {
 
   const id = 'my-note-id'; // TODO: fetch id from path
 
   return (
-    <MapPage id={id}/>
+    <StorageContextProvider>
+      <MapPage id={id}/>
+    </StorageContextProvider>
   )
 
 }
