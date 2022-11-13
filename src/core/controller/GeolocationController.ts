@@ -42,4 +42,10 @@ function initLocationFeature(): Feature {
 
 }
 
-export { initGeolocation, initLocationFeature };
+function initLocationFeatureRef(locationFeatureRef: MutableRefObject<Feature|undefined>): void {
+  if (!locationFeatureRef.current) {
+    locationFeatureRef.current = initLocationFeature();
+  }
+}
+
+export { initGeolocation, initLocationFeatureRef };

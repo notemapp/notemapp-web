@@ -18,7 +18,9 @@ import {get as getProjection} from "ol/proj";
 import style from "./MapPage.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
-import {initGeolocation, initLocationFeature} from "../core/controller/GeolocationController";
+import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
+import {initSources} from "../core/controller/MapSourceController";
+import {initLayers} from "../core/controller/MapLayerController";
 
 export default function MapPage(props: { noteId: string }) {
 
@@ -104,54 +106,12 @@ export default function MapPage(props: { noteId: string }) {
 
   useEffect(() => {
 
-    // Initialize vector source
-    if (!featuresSourceRef.current) {
+    // @ts-ignore
+    initSources(noteId, storageContext?.noteStoreRef, featuresSourceRef, locationSourceRef);
+    // @ts-ignore
+    initLayers(featuresLayerRef, locationLayerRef, tileLayerRef, featuresSourceRef, locationSourceRef);
 
-      const loadFeatures = async () => {
-        const features = await get(noteId, storageContext?.noteStoreRef.current);
-        if (featuresSourceRef.current && features) {
-          featuresSourceRef.current.addFeatures(new GeoJSON().readFeatures(features));
-          log("[INIT] Load features from store");
-        }
-      }
-
-      featuresSourceRef.current = new VectorSource({
-        wrapX: false,
-        loader: loadFeatures
-      });
-
-    }
-    if (!locationSourceRef.current) {
-      locationSourceRef.current = new VectorSource({wrapX: false});
-    }
-
-    // Initialize layers
-    if (!featuresLayerRef.current) {
-      featuresLayerRef.current = new VectorLayer({
-        source: featuresSourceRef.current
-      });
-    }
-    if (!locationLayerRef.current) {
-      locationLayerRef.current = new VectorLayer({
-        source: locationSourceRef.current
-      });
-    }
-    if (!tileLayerRef.current) {
-      tileLayerRef.current = new TileLayer({
-        source: new OSM({
-          crossOrigin: 'anonymous',
-          /*
-          tileLoadFunction: (imageTile, src) => {
-            const {pathname} = new URL(src);
-            // @ts-ignore
-            imageTile.getImage().src = `https://proxy.notemapp.com${pathname}`;
-          }
-          */
-        })
-      });
-    }
-
-    if (!mapRef.current && mapContainerRef.current) {
+    if (!mapRef.current && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
 
       // Limit multi-world panning
       // @ts-ignore
@@ -210,16 +170,15 @@ export default function MapPage(props: { noteId: string }) {
 
   }, []);
 
-  // Geolocation:
-  const positionFeature = useRef<Feature>();
-  useEffect(() => {
-    if (!positionFeature.current) positionFeature.current = initLocationFeature()
-  }, []);
+  // Geolocation
+  // -----------
+  const locationFeatureRef = useRef<Feature>();
+  useEffect(() => initLocationFeatureRef(locationFeatureRef), []);
 
   const onLocate = () => {
     if (!geolocationRef.current) {
-      positionFeature.current && locationSourceRef.current?.addFeature(positionFeature.current);
-      initGeolocation(geolocationRef, mapRef, positionFeature);
+      locationFeatureRef.current && locationSourceRef.current?.addFeature(locationFeatureRef.current);
+      initGeolocation(geolocationRef, mapRef, locationFeatureRef);
     }
   }
 
