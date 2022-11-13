@@ -20,7 +20,7 @@ import {StorageContext} from "./StorageContext";
 import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
 import {initSources} from "../core/controller/MapSourceController";
 import {initLayers} from "../core/controller/MapLayerController";
-import {initMap} from "../core/controller/MapController";
+import {initMap, initMapEvents, loadPreviousMapState} from "../core/controller/MapController";
 
 export default function MapPage(props: { noteId: string }) {
 
@@ -107,34 +107,17 @@ export default function MapPage(props: { noteId: string }) {
   useEffect(() => {
 
     // @ts-ignore
-    initSources(noteId, storageContext?.noteStoreRef, featuresSourceRef, locationSourceRef);
+    initSources(noteId, storageContext, featuresSourceRef, locationSourceRef);
     // @ts-ignore
     initLayers(featuresLayerRef, locationLayerRef, tileLayerRef, featuresSourceRef, locationSourceRef);
-    // @ts-ignore
-    initMap(mapRef, mapContainerRef, [featuresLayerRef.current, locationLayerRef.current, tileLayerRef.current]);
 
-    if (!mapRef.current && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
-
-      // Restore previous map view
-      get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
-        if (view) {
-          const previousView = JSON.parse(view);
-          mapRef.current?.getView().setCenter(previousView.center);
-          mapRef.current?.getView().setZoom(previousView.zoom);
-          log("[LOAD] Restore previous view");
-        }
-      });
-      // Save map view on move end
+    if (!mapRef.current) {
       // @ts-ignore
-      mapRef.current.on('moveend', () => {
-        const currentView = {
-          center: mapRef.current?.getView().getCenter(),
-          zoom: mapRef.current?.getView().getZoom()
-        };
-        set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
-          .then(() => log("[UPDATE] Save current view"));
-      });
-
+      initMap(mapRef, mapContainerRef, [featuresLayerRef.current, locationLayerRef.current, tileLayerRef.current]);
+      // @ts-ignore
+      loadPreviousMapState(noteId, mapRef, storageContext);
+      // @ts-ignore
+      initMapEvents(noteId, mapRef, storageContext);
     }
 
     if (!featuresSourceRef.current) {
