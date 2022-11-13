@@ -17,12 +17,10 @@ import {DrawEvent} from "ol/interaction/Draw";
 import {get as getProjection} from "ol/proj";
 import style from "./MapPage.module.css";
 import SideToolbar from "./SideToolbar";
-import {Fill, Stroke, Style} from "ol/style";
-import CircleStyle from "ol/style/Circle";
-import Point from 'ol/geom/Point';
 import {StorageContext} from "./StorageContext";
+import {initGeolocation, initLocationFeature} from "../core/controller/GeolocationController";
 
-export default function MapPage(props: {noteId: string}) {
+export default function MapPage(props: { noteId: string }) {
 
   const noteId = props.noteId;
 
@@ -45,6 +43,9 @@ export default function MapPage(props: {noteId: string}) {
   // @ts-ignore
   const undoRedoInteractionRef = useRef<UndoRedo>();
   const drawInteractionRef = useRef<Draw>();
+
+  // Geolocation
+  const geolocationRef = useRef<Geolocation>();
 
   const drawTypeRef = useRef<DrawType>(DrawType.None);
   const freeHandRef = useRef<boolean>(false);
@@ -212,48 +213,14 @@ export default function MapPage(props: {noteId: string}) {
   // Geolocation:
   const positionFeature = useRef<Feature>();
   useEffect(() => {
-    if (positionFeature.current) return;
-    positionFeature.current = new Feature();
-    positionFeature.current.setStyle(
-      new Style({
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({
-            color: '#3399CC',
-          }),
-          stroke: new Stroke({
-            color: '#fff',
-            width: 2,
-          }),
-        }),
-      })
-    );
+    if (!positionFeature.current) positionFeature.current = initLocationFeature()
   }, []);
 
-  const geolocation = useRef<Geolocation>();
-
   const onLocate = () => {
-
-    if (!geolocation.current && positionFeature.current) {
-
-      locationSourceRef.current?.addFeature(positionFeature.current);
-
-      geolocation.current = new Geolocation({
-        trackingOptions: {
-          enableHighAccuracy: true,
-        },
-        projection: mapRef.current?.getView().getProjection()
-      });
-
-      geolocation.current.setTracking(true);
-
-      geolocation.current.on('change:position', function () {
-        const coordinates = geolocation.current?.getPosition();
-        positionFeature.current?.setGeometry(coordinates ? new Point(coordinates) : undefined);
-      });
-
+    if (!geolocationRef.current) {
+      positionFeature.current && locationSourceRef.current?.addFeature(positionFeature.current);
+      initGeolocation(geolocationRef, mapRef, positionFeature);
     }
-
   }
 
   return (
@@ -267,7 +234,7 @@ export default function MapPage(props: {noteId: string}) {
         onUndo={onUndo}
         onRedo={onRedo}
       />
-      <SideToolbar onLocate={onLocate} />
+      <SideToolbar onLocate={onLocate}/>
     </div>
   );
 
