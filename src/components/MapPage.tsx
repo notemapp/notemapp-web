@@ -22,7 +22,6 @@ import SideToolbar from "./SideToolbar";
 import {Fill, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Point from 'ol/geom/Point';
-import {Attribution, defaults} from "ol/control";
 
 export default function MapPage(props: {id: string}) {
 
@@ -31,6 +30,7 @@ export default function MapPage(props: {id: string}) {
   const notesStoreRef = useRef<UseStore>();         // Storage for notes features
   const notesPrefsStoreRef = useRef<UseStore>();    // Storage for map preferences (zoom, center, etc.)
 
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map>();
   const vectorSourceRef = useRef<VectorSource>();
 
@@ -163,16 +163,17 @@ export default function MapPage(props: {id: string}) {
       });
     }
 
-    if (!mapRef.current) {
+    if (!mapRef.current && mapContainerRef.current) {
 
       // Limit multi-world panning
       // @ts-ignore
       const extent = getProjection('EPSG:3857').getExtent().slice();
       extent[0] += extent[0];
       extent[2] += extent[2];
+
       // Instantiate map
       mapRef.current = new Map({
-        target: 'map',
+        target: mapContainerRef.current,
         layers: [tileLayerRef.current, vectorLayerRef.current],
         view: new View({
           center: [-11000000, 4600000],
@@ -210,7 +211,7 @@ export default function MapPage(props: {id: string}) {
       });
     }
 
-    if (!undoRedoInteractionRef.current) {
+    if (!undoRedoInteractionRef.current && mapRef.current) {
       undoRedoInteractionRef.current = new UndoRedo({
         maxLength: 20,
         layers: [vectorLayerRef.current],
@@ -267,7 +268,7 @@ export default function MapPage(props: {id: string}) {
 
   return (
     <div>
-      <div id="map" className={style.map}></div>
+      <div ref={mapContainerRef} className={style.map}></div>
       <BottomToolbar
         drawType={drawTypeRef.current}
         freeHand={freeHandRef.current}
