@@ -1,0 +1,4 @@
+/* Move OSM attribution above toolbar */
+.ol-attribution.ol-uncollapsible {
+    bottom: 3rem!important;
+}

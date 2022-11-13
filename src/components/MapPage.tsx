@@ -3,7 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import {Feature, Geolocation, Tile, View} from "ol";
+import {Feature, Geolocation, View} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
@@ -22,6 +22,7 @@ import SideToolbar from "./SideToolbar";
 import {Fill, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import Point from 'ol/geom/Point';
+import {Attribution, defaults} from "ol/control";
 
 export default function MapPage(props: {id: string}) {
 
