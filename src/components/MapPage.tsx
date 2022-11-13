@@ -3,7 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import {Feature, Geolocation, View} from "ol";
+import {Feature, Geolocation} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
@@ -14,13 +14,13 @@ import {DrawType, toGeometryFeature} from "../core/DrawType";
 import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import log from "../core/Logger";
 import {DrawEvent} from "ol/interaction/Draw";
-import {get as getProjection} from "ol/proj";
 import style from "./MapPage.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
 import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
 import {initSources} from "../core/controller/MapSourceController";
 import {initLayers} from "../core/controller/MapLayerController";
+import {initMap} from "../core/controller/MapController";
 
 export default function MapPage(props: { noteId: string }) {
 
@@ -113,22 +113,7 @@ export default function MapPage(props: { noteId: string }) {
 
     if (!mapRef.current && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
 
-      // Limit multi-world panning
-      // @ts-ignore
-      const extent = getProjection('EPSG:3857').getExtent().slice();
-      extent[0] += extent[0];
-      extent[2] += extent[2];
-
-      // Instantiate map
-      mapRef.current = new Map({
-        target: mapContainerRef.current,
-        layers: [tileLayerRef.current, featuresLayerRef.current, locationLayerRef.current],
-        view: new View({
-          center: [-11000000, 4600000],
-          zoom: 4,
-          extent: extent
-        })
-      });
+      initMap(mapRef, mapContainerRef, tileLayerRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
 
       // Restore previous map view
       get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
@@ -138,15 +123,6 @@ export default function MapPage(props: { noteId: string }) {
           mapRef.current?.getView().setZoom(previousView.zoom);
           log("[LOAD] Restore previous view");
         }
-      });
-      // Save map view on move end
-      mapRef.current.on('moveend', () => {
-        const currentView = {
-          center: mapRef.current?.getView().getCenter(),
-          zoom: mapRef.current?.getView().getZoom()
-        };
-        set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
-          .then(() => log("[UPDATE] Save current view"));
       });
 
     }
