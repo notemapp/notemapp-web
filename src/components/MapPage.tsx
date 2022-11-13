@@ -21,6 +21,7 @@ import {initGeolocation, initLocationFeatureRef} from "../core/controller/Geoloc
 import {initSources} from "../core/controller/MapSourceController";
 import {initLayers} from "../core/controller/MapLayerController";
 import {initMap} from "../core/controller/MapController";
+import {initUndoInteraction} from "../core/controller/MapInteractionController";
 
 export default function MapPage(props: { noteId: string }) {
 
@@ -92,8 +93,11 @@ export default function MapPage(props: { noteId: string }) {
     updateDrawInteraction();
   }
   const updateNotesStore = () => {
-    set(noteId, new GeoJSON().writeFeatures(featuresSourceRef.current?.getFeatures() || []), storageContext?.noteStoreRef.current)
-      .then(() => log("[UPDATE] Update features"));
+    set(
+      noteId,
+      new GeoJSON().writeFeatures(featuresSourceRef.current?.getFeatures() || []),
+      storageContext?.noteStoreRef.current
+    ).then(() => log("[UPDATE] Update features"));
   }
   const onUndo = () => {
     undoRedoInteractionRef.current.undo();
@@ -116,13 +120,7 @@ export default function MapPage(props: { noteId: string }) {
       initMap(mapRef, mapContainerRef, tileLayerRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
     }
 
-    if (!undoRedoInteractionRef.current && mapRef.current) {
-      undoRedoInteractionRef.current = new UndoRedo({
-        maxLength: 20,
-        layers: [featuresLayerRef.current],
-      });
-      mapRef.current.addInteraction(undoRedoInteractionRef.current);
-    }
+    initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);
 
   }, []);
 
