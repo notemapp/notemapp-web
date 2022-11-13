@@ -7,7 +7,7 @@ import {Feature, Geolocation} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
-import {get, set} from 'idb-keyval';
+import {set} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
 import {DrawType, toGeometryFeature} from "../core/DrawType";
@@ -114,15 +114,6 @@ export default function MapPage(props: { noteId: string }) {
     if (!mapRef.current
       && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
       initMap(mapRef, mapContainerRef, tileLayerRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
-    }
-
-    if (!featuresSourceRef.current) {
-      get(noteId).then((value) => {
-        if (value === undefined && featuresSourceRef.current) {
-          set(noteId, new GeoJSON().writeFeatures(featuresSourceRef.current.getFeatures()), storageContext?.noteStoreRef.current)
-            .then(() => log("[INIT] Create new note"));
-        }
-      });
     }
 
     if (!undoRedoInteractionRef.current && mapRef.current) {
