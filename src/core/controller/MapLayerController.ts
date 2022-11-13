@@ -5,24 +5,24 @@ import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
 
 function initVectorLayer(
-  layerRef: MutableRefObject<VectorLayer<VectorSource>>,
-  sourceRef: MutableRefObject<VectorSource>
+  layer: MutableRefObject<VectorLayer<VectorSource>>,
+  source: MutableRefObject<VectorSource>
 ): void {
 
-  if (!layerRef.current) {
-    layerRef.current = new VectorLayer({
-      source: sourceRef.current
+  if (!layer.current) {
+    layer.current = new VectorLayer({
+      source: source.current
     });
   }
 
 }
 
 function initTileLayer(
-  layerRef: MutableRefObject<TileLayer<OSM>>,
+  layer: MutableRefObject<TileLayer<OSM>>,
 ): void {
 
-  if (!layerRef.current) {
-    layerRef.current = new TileLayer({
+  if (!layer.current) {
+    layer.current = new TileLayer({
       source: new OSM({
         crossOrigin: 'anonymous',
         // TODO: load tiles from own proxy
@@ -40,16 +40,16 @@ function initTileLayer(
 }
 
 function initLayers(
-  featuresLayerRef: MutableRefObject<VectorLayer<VectorSource>>,
-  locationLayerRef: MutableRefObject<VectorLayer<VectorSource>>,
-  tileLayerRef: MutableRefObject<TileLayer<OSM>>,
-  featuresSourceRef: MutableRefObject<VectorSource>,
-  locationSourceRef: MutableRefObject<VectorSource>
+  featuresLayer: MutableRefObject<VectorLayer<VectorSource>>,
+  locationLayer: MutableRefObject<VectorLayer<VectorSource>>,
+  tileLayer: MutableRefObject<TileLayer<OSM>>,
+  featuresSource: MutableRefObject<VectorSource>,
+  locationSource: MutableRefObject<VectorSource>
 ): void {
 
-  initVectorLayer(featuresLayerRef, featuresSourceRef);
-  initVectorLayer(locationLayerRef, locationSourceRef);
-  initTileLayer(tileLayerRef);
+  initVectorLayer(featuresLayer, featuresSource);
+  initVectorLayer(locationLayer, locationSource);
+  initTileLayer(tileLayer);
 
 }
 

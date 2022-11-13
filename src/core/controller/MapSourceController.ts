@@ -7,16 +7,16 @@ import {MutableRefObject} from "react";
 function initFeaturesSource(
   noteId: string,
   noteStoreRef: MutableRefObject<UseStore|undefined>,
-  sourceRef: MutableRefObject<VectorSource>
+  source: MutableRefObject<VectorSource>
 ): void {
 
-  if (!sourceRef.current) {
-    sourceRef.current = new VectorSource({
+  if (!source.current) {
+    source.current = new VectorSource({
       wrapX: false,
       loader: async () => {
         const features = await get(noteId, noteStoreRef?.current);
-        if (sourceRef.current && features) {
-          sourceRef.current.addFeatures(new GeoJSON().readFeatures(features));
+        if (source.current && features) {
+          source.current.addFeatures(new GeoJSON().readFeatures(features));
           log("[INIT] Loaded features from store");
         }
       }
@@ -26,11 +26,11 @@ function initFeaturesSource(
 }
 
 function initLocationSource(
-  sourceRef: MutableRefObject<VectorSource>
+  source: MutableRefObject<VectorSource>
 ): void {
 
-  if (!sourceRef.current) {
-    sourceRef.current = new VectorSource({wrapX: false});
+  if (!source.current) {
+    source.current = new VectorSource({wrapX: false});
   }
 
 }
@@ -38,12 +38,12 @@ function initLocationSource(
 function initSources(
   noteId: string,
   noteStoreRef: MutableRefObject<UseStore|undefined>,
-  featuresSourceRef: MutableRefObject<VectorSource>,
-  locationSourceRef: MutableRefObject<VectorSource>
+  featuresSource: MutableRefObject<VectorSource>,
+  locationSource: MutableRefObject<VectorSource>
 ): void {
 
-  initFeaturesSource(noteId, noteStoreRef, featuresSourceRef);
-  initLocationSource(locationSourceRef);
+  initFeaturesSource(noteId, noteStoreRef, featuresSource);
+  initLocationSource(locationSource);
 
 }
 
