@@ -18,10 +18,10 @@ function App() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
     .register('./service-worker.js')
-    .then(() => log('Service Worker Registered'))
-    .catch(() => log('Failed Service Worker Registration'));
+    .then(() => log('[Service Worker] Registered successfully'))
+    .catch(() => log('[Service Worker] Registration failed'));
 } else {
-  console.log('This browser does not support Service Workers');
+  console.log('[Service Worker] This browser does not support Service Workers');
 }
 
 export default App

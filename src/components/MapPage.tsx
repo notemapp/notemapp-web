@@ -28,12 +28,12 @@ export default function MapPage(props: {id: string}) {
 
   const storageContext = useContext(StorageContext);
 
-  const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map>();
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const vectorSourceRef = useRef<VectorSource>();
 
-  const vectorLayerRef = useRef<VectorLayer<VectorSource>>();
-  const tileLayerRef = useRef<TileLayer<OSM>>();
+  const vectorLayerRef = useRef<VectorLayer<VectorSource>>();   // Layer for features
+  const tileLayerRef = useRef<TileLayer<OSM>>();                // Layer for tiles
 
   const drawInteractionRef = useRef<Draw>();
   // @ts-ignore
@@ -77,16 +77,16 @@ export default function MapPage(props: {id: string}) {
       let features = vectorSourceRef.current?.getFeatures() || [];
       features = features.concat(event.feature); // Source is not updated yet, add the new feature manually
       set(id, new GeoJSON().writeFeatures(features), storageContext?.noteStoreRef.current)
-        .then(() => log("Note updated with new feature"));
+        .then(() => log("[UPDATE] Add new feature"));
     });
 
-    log('Drawing interaction updated to', drawTypeRef.current);
+    log('[UPDATE] Change drawType:', drawTypeRef.current);
 
   }
 
   const onFreeHandToggle = () => {
     freeHandRef.current = !freeHandRef.current;
-    log("FreeHand mode:", freeHandRef.current);
+    log("[UPDATE] FreeHand:", freeHandRef.current);
     updateDrawInteraction();
   }
   const onDrawTypeChange = (type: DrawType) => {
@@ -95,7 +95,7 @@ export default function MapPage(props: {id: string}) {
   }
   const updateNotesStore = () => {
     set(id, new GeoJSON().writeFeatures(vectorSourceRef.current?.getFeatures() || []), storageContext?.noteStoreRef.current)
-      .then(() => log("Note has been updated"));
+      .then(() => log("[UPDATE] Update features"));
   }
   const onUndo = () => {
     undoRedoInteractionRef.current.undo();
@@ -106,7 +106,6 @@ export default function MapPage(props: {id: string}) {
     updateNotesStore();
   }
 
-  // Initialization
   useEffect(() => {
 
     // Initialize vector source
@@ -116,7 +115,7 @@ export default function MapPage(props: {id: string}) {
         const features = await get(id, storageContext?.noteStoreRef.current);
         if (vectorSourceRef.current && features) {
           vectorSourceRef.current.addFeatures(new GeoJSON().readFeatures(features));
-          log("Loaded features from IndexedDB");
+          log("[INIT] Load features from store");
         }
       }
 
@@ -130,14 +129,7 @@ export default function MapPage(props: {id: string}) {
     // Initialize layers
     if (!vectorLayerRef.current) {
       vectorLayerRef.current = new VectorLayer({
-        source: vectorSourceRef.current,
-        style: {
-          'fill-color': 'rgba(255, 255, 255, 0.2)',
-          'stroke-color': '#000000',
-          'stroke-width': 5,
-          'circle-radius': 7,
-          'circle-fill-color': '#000000',
-        },
+        source: vectorSourceRef.current
       });
     }
     if (!tileLayerRef.current) {
@@ -180,7 +172,7 @@ export default function MapPage(props: {id: string}) {
           const previousView = JSON.parse(view);
           mapRef.current?.getView().setCenter(previousView.center);
           mapRef.current?.getView().setZoom(previousView.zoom);
-          log("Restored previous view");
+          log("[LOAD] Restore previous view");
         }
       });
       // Save map view on move end
@@ -189,7 +181,8 @@ export default function MapPage(props: {id: string}) {
           center: mapRef.current?.getView().getCenter(),
           zoom: mapRef.current?.getView().getZoom()
         };
-        set(id, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current).then(() => log("Local note prefs updated"));
+        set(id, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
+          .then(() => log("[UPDATE] Save current view"));
       });
 
     }
@@ -198,7 +191,7 @@ export default function MapPage(props: {id: string}) {
       get(id).then((value) => {
         if (value === undefined && vectorSourceRef.current) {
           set(id, new GeoJSON().writeFeatures(vectorSourceRef.current.getFeatures()), storageContext?.noteStoreRef.current)
-            .then(() => log("Initialized new note"));
+            .then(() => log("[INIT] Create new note"));
         }
       });
     }
