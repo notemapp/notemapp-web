@@ -10,10 +10,9 @@ import "ol/ol.css";
 import {set} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
-import {DrawType, toGeometryFeature} from "../core/DrawType";
+import {DrawType} from "../core/DrawType";
 import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import log from "../core/Logger";
-import {DrawEvent} from "ol/interaction/Draw";
 import style from "./MapPage.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
@@ -21,7 +20,7 @@ import {initGeolocation, initLocationFeatureRef} from "../core/controller/Geoloc
 import {initSources} from "../core/controller/MapSourceController";
 import {initLayers} from "../core/controller/MapLayerController";
 import {initMap} from "../core/controller/MapController";
-import {initUndoInteraction} from "../core/controller/MapInteractionController";
+import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
 
 export default function MapPage(props: { noteId: string }) {
 
@@ -53,44 +52,16 @@ export default function MapPage(props: { noteId: string }) {
   const drawTypeRef = useRef<DrawType>(DrawType.None);
   const freeHandRef = useRef<boolean>(false);
 
-  const updateDrawInteraction = () => {
-
-    if (!mapRef.current) return;
-
-    if (drawInteractionRef.current) mapRef.current.removeInteraction(drawInteractionRef.current);
-
-    if (drawTypeRef.current === DrawType.None) return;
-
-    const {type, geometryFunction} = toGeometryFeature(drawTypeRef.current);
-
-    drawInteractionRef.current = new Draw({
-      source: featuresSourceRef.current,
-      // @ts-ignore
-      type: type,
-      geometryFunction: geometryFunction,
-      freehand: freeHandRef.current
-    });
-    mapRef.current.addInteraction(drawInteractionRef.current);
-
-    drawInteractionRef.current.on('drawend', (event: DrawEvent) => {
-      let features = featuresSourceRef.current?.getFeatures() || [];
-      features = features.concat(event.feature); // Source is not updated yet, add the new feature manually
-      set(noteId, new GeoJSON().writeFeatures(features), storageContext?.noteStoreRef.current)
-        .then(() => log("[UPDATE] Add new feature"));
-    });
-
-    log('[UPDATE] Change drawType:', drawTypeRef.current);
-
-  }
-
   const onFreeHandToggle = () => {
     freeHandRef.current = !freeHandRef.current;
     log("[UPDATE] FreeHand:", freeHandRef.current);
-    updateDrawInteraction();
+    updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
+      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext);
   }
   const onDrawTypeChange = (type: DrawType) => {
     drawTypeRef.current = type;
-    updateDrawInteraction();
+    updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
+      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext);
   }
   const updateNotesStore = () => {
     set(
