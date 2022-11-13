@@ -107,24 +107,13 @@ export default function MapPage(props: { noteId: string }) {
   useEffect(() => {
 
     // @ts-ignore
-    initSources(noteId, storageContext?.noteStoreRef, featuresSourceRef, locationSourceRef);
+    initSources(noteId, storageContext, featuresSourceRef, locationSourceRef);
     // @ts-ignore
     initLayers(featuresLayerRef, locationLayerRef, tileLayerRef, featuresSourceRef, locationSourceRef);
 
-    if (!mapRef.current && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
-
+    if (!mapRef.current
+      && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
       initMap(mapRef, mapContainerRef, tileLayerRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
-
-      // Restore previous map view
-      get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
-        if (view) {
-          const previousView = JSON.parse(view);
-          mapRef.current?.getView().setCenter(previousView.center);
-          mapRef.current?.getView().setZoom(previousView.zoom);
-          log("[LOAD] Restore previous view");
-        }
-      });
-
     }
 
     if (!featuresSourceRef.current) {

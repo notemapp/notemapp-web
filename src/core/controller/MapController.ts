@@ -6,7 +6,7 @@ import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import {set} from "idb-keyval";
+import {get, set} from "idb-keyval";
 import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
 
@@ -46,6 +46,15 @@ function initMap(
       };
       set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
+    });
+
+    get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
+      if (view) {
+        const previousView = JSON.parse(view);
+        mapRef.current?.getView().setCenter(previousView.center);
+        mapRef.current?.getView().setZoom(previousView.zoom);
+        log("[LOAD] Restore previous view");
+      }
     });
 
   }
