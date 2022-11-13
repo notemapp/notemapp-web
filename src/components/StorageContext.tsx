@@ -2,7 +2,7 @@ import {createContext, MutableRefObject, ReactNode, useLayoutEffect, useRef} fro
 import {createStore, UseStore} from "idb-keyval";
 import {DB_NOTES, DB_NOTES_PREFS, STORE_NOTES, STORE_NOTES_PREFS} from "../core/Keys";
 
-export interface StorageContextInterface {
+interface StorageContextInterface {
   noteStoreRef: MutableRefObject<UseStore|undefined>;
   notePrefsStoreRef: MutableRefObject<UseStore|undefined>;
 }

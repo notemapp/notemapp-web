@@ -1,13 +1,12 @@
-import {get} from "idb-keyval";
+import {get, UseStore} from "idb-keyval";
 import {GeoJSON} from "ol/format";
 import log from "../Logger";
 import VectorSource from "ol/source/Vector";
 import {MutableRefObject} from "react";
-import {StorageContextInterface} from "../../components/StorageContext";
 
 function initFeaturesSource(
   noteId: string,
-  storageContext: StorageContextInterface,
+  noteStoreRef: MutableRefObject<UseStore|undefined>,
   sourceRef: MutableRefObject<VectorSource>
 ): void {
 
@@ -15,7 +14,7 @@ function initFeaturesSource(
     sourceRef.current = new VectorSource({
       wrapX: false,
       loader: async () => {
-        const features = await get(noteId, storageContext?.noteStoreRef?.current);
+        const features = await get(noteId, noteStoreRef?.current);
         if (sourceRef.current && features) {
           sourceRef.current.addFeatures(new GeoJSON().readFeatures(features));
           log("[INIT] Loaded features from store");
@@ -38,12 +37,12 @@ function initLocationSource(
 
 function initSources(
   noteId: string,
-  storageContext: StorageContextInterface,
+  noteStoreRef: MutableRefObject<UseStore|undefined>,
   featuresSourceRef: MutableRefObject<VectorSource>,
   locationSourceRef: MutableRefObject<VectorSource>
 ): void {
 
-  initFeaturesSource(noteId, storageContext, featuresSourceRef);
+  initFeaturesSource(noteId, noteStoreRef, featuresSourceRef);
   initLocationSource(locationSourceRef);
 
 }
