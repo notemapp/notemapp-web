@@ -10,10 +10,10 @@ import "ol/ol.css";
 import {get, set} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
-import {DrawType} from "../core/DrawType";
+import {DrawType, toGeometryFeature} from "../core/DrawType";
 import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import log from "../core/Logger";
-import {createBox, DrawEvent} from "ol/interaction/Draw";
+import {DrawEvent} from "ol/interaction/Draw";
 import {get as getProjection} from "ol/proj";
 import style from "./MapPage.module.css";
 import SideToolbar from "./SideToolbar";
@@ -22,24 +22,29 @@ import CircleStyle from "ol/style/Circle";
 import Point from 'ol/geom/Point';
 import {StorageContext} from "./StorageContext";
 
-export default function MapPage(props: {id: string}) {
+export default function MapPage(props: {noteId: string}) {
 
-  const id = props.id;
+  const noteId = props.noteId;
 
   const storageContext = useContext(StorageContext);
 
+  // Map
   const mapRef = useRef<Map>();
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const vectorSourceRef = useRef<VectorSource>();
+
+  // Sources
+  const featuresSourceRef = useRef<VectorSource>();
   const locationSourceRef = useRef<VectorSource>();
 
-  const vectorLayerRef = useRef<VectorLayer<VectorSource>>();   // Layer for features
-  const locationLayerRef = useRef<VectorLayer<VectorSource>>(); // Layer for location
-  const tileLayerRef = useRef<TileLayer<OSM>>();                // Layer for tiles
+  // Layers
+  const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
+  const locationLayerRef = useRef<VectorLayer<VectorSource>>();
+  const tileLayerRef = useRef<TileLayer<OSM>>();
 
-  const drawInteractionRef = useRef<Draw>();
+  // Interactions
   // @ts-ignore
   const undoRedoInteractionRef = useRef<UndoRedo>();
+  const drawInteractionRef = useRef<Draw>();
 
   const drawTypeRef = useRef<DrawType>(DrawType.None);
   const freeHandRef = useRef<boolean>(false);
@@ -48,26 +53,14 @@ export default function MapPage(props: {id: string}) {
 
     if (!mapRef.current) return;
 
-    if (drawInteractionRef.current) {
-      mapRef.current.removeInteraction(drawInteractionRef.current);
-    }
+    if (drawInteractionRef.current) mapRef.current.removeInteraction(drawInteractionRef.current);
 
     if (drawTypeRef.current === DrawType.None) return;
 
-    let geometryFunction = undefined;
-    let type = 'LineString';
-    switch (drawTypeRef.current) {
-      case DrawType.Polygon:
-        type = 'Polygon';
-        break;
-      case DrawType.Rectangle:
-        type = 'Circle';
-        geometryFunction = createBox();
-        break;
-    }
+    const {type, geometryFunction} = toGeometryFeature(drawTypeRef.current);
 
     drawInteractionRef.current = new Draw({
-      source: vectorSourceRef.current,
+      source: featuresSourceRef.current,
       // @ts-ignore
       type: type,
       geometryFunction: geometryFunction,
@@ -76,9 +69,9 @@ export default function MapPage(props: {id: string}) {
     mapRef.current.addInteraction(drawInteractionRef.current);
 
     drawInteractionRef.current.on('drawend', (event: DrawEvent) => {
-      let features = vectorSourceRef.current?.getFeatures() || [];
+      let features = featuresSourceRef.current?.getFeatures() || [];
       features = features.concat(event.feature); // Source is not updated yet, add the new feature manually
-      set(id, new GeoJSON().writeFeatures(features), storageContext?.noteStoreRef.current)
+      set(noteId, new GeoJSON().writeFeatures(features), storageContext?.noteStoreRef.current)
         .then(() => log("[UPDATE] Add new feature"));
     });
 
@@ -96,7 +89,7 @@ export default function MapPage(props: {id: string}) {
     updateDrawInteraction();
   }
   const updateNotesStore = () => {
-    set(id, new GeoJSON().writeFeatures(vectorSourceRef.current?.getFeatures() || []), storageContext?.noteStoreRef.current)
+    set(noteId, new GeoJSON().writeFeatures(featuresSourceRef.current?.getFeatures() || []), storageContext?.noteStoreRef.current)
       .then(() => log("[UPDATE] Update features"));
   }
   const onUndo = () => {
@@ -111,17 +104,17 @@ export default function MapPage(props: {id: string}) {
   useEffect(() => {
 
     // Initialize vector source
-    if (!vectorSourceRef.current) {
+    if (!featuresSourceRef.current) {
 
       const loadFeatures = async () => {
-        const features = await get(id, storageContext?.noteStoreRef.current);
-        if (vectorSourceRef.current && features) {
-          vectorSourceRef.current.addFeatures(new GeoJSON().readFeatures(features));
+        const features = await get(noteId, storageContext?.noteStoreRef.current);
+        if (featuresSourceRef.current && features) {
+          featuresSourceRef.current.addFeatures(new GeoJSON().readFeatures(features));
           log("[INIT] Load features from store");
         }
       }
 
-      vectorSourceRef.current = new VectorSource({
+      featuresSourceRef.current = new VectorSource({
         wrapX: false,
         loader: loadFeatures
       });
@@ -132,9 +125,9 @@ export default function MapPage(props: {id: string}) {
     }
 
     // Initialize layers
-    if (!vectorLayerRef.current) {
-      vectorLayerRef.current = new VectorLayer({
-        source: vectorSourceRef.current
+    if (!featuresLayerRef.current) {
+      featuresLayerRef.current = new VectorLayer({
+        source: featuresSourceRef.current
       });
     }
     if (!locationLayerRef.current) {
@@ -168,7 +161,7 @@ export default function MapPage(props: {id: string}) {
       // Instantiate map
       mapRef.current = new Map({
         target: mapContainerRef.current,
-        layers: [tileLayerRef.current, vectorLayerRef.current, locationLayerRef.current],
+        layers: [tileLayerRef.current, featuresLayerRef.current, locationLayerRef.current],
         view: new View({
           center: [-11000000, 4600000],
           zoom: 4,
@@ -177,7 +170,7 @@ export default function MapPage(props: {id: string}) {
       });
 
       // Restore previous map view
-      get(id, storageContext?.notePrefsStoreRef.current).then((view: string) => {
+      get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
         if (view) {
           const previousView = JSON.parse(view);
           mapRef.current?.getView().setCenter(previousView.center);
@@ -191,16 +184,16 @@ export default function MapPage(props: {id: string}) {
           center: mapRef.current?.getView().getCenter(),
           zoom: mapRef.current?.getView().getZoom()
         };
-        set(id, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
+        set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
           .then(() => log("[UPDATE] Save current view"));
       });
 
     }
 
-    if (!vectorSourceRef.current) {
-      get(id).then((value) => {
-        if (value === undefined && vectorSourceRef.current) {
-          set(id, new GeoJSON().writeFeatures(vectorSourceRef.current.getFeatures()), storageContext?.noteStoreRef.current)
+    if (!featuresSourceRef.current) {
+      get(noteId).then((value) => {
+        if (value === undefined && featuresSourceRef.current) {
+          set(noteId, new GeoJSON().writeFeatures(featuresSourceRef.current.getFeatures()), storageContext?.noteStoreRef.current)
             .then(() => log("[INIT] Create new note"));
         }
       });
@@ -209,7 +202,7 @@ export default function MapPage(props: {id: string}) {
     if (!undoRedoInteractionRef.current && mapRef.current) {
       undoRedoInteractionRef.current = new UndoRedo({
         maxLength: 20,
-        layers: [vectorLayerRef.current],
+        layers: [featuresLayerRef.current],
       });
       mapRef.current.addInteraction(undoRedoInteractionRef.current);
     }
@@ -265,7 +258,7 @@ export default function MapPage(props: {id: string}) {
 
   return (
     <div>
-      <div ref={mapContainerRef} className={style.map}></div>
+      <div ref={mapContainerRef} className={style.mapContainer}></div>
       <BottomToolbar
         drawType={drawTypeRef.current}
         freeHand={freeHandRef.current}

@@ -13,8 +13,7 @@ export function BottomToolbar(props: {
   const [drawType, setDrawType] = useState<DrawType>(props.drawType);
   const [freeHand, setFreeHand] = useState<boolean>(props.freeHand);
 
-  const buttonClass = (thisDrawType: DrawType) =>
-    drawType === thisDrawType ? "bg-blue-500 text-white rounded" : "";
+  const buttonClass = (thisDrawType: DrawType) => drawType === thisDrawType ? "bg-blue-500 text-white rounded" : "";
 
   const onDrawTypeChange = (type: DrawType) => {
     props.onDrawTypeChange(type);
@@ -45,8 +44,6 @@ export function BottomToolbar(props: {
               </div>
             </label>
           </button>
-          {/*<button>Annotation</button>*/}
-          {/*<button>Measure</button>*/}
         </div>
         <div className="w-full h-full flex justify-end space-x-4">
           <button onClick={props.onUndo}>Undo</button>

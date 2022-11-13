@@ -5,11 +5,11 @@ import {StorageContextProvider} from "./components/StorageContext";
 
 function App() {
 
-  const id = 'my-note-id'; // TODO: fetch id from path
+  const noteId = 'my-note-id'; // TODO: fetch id from path
 
   return (
     <StorageContextProvider>
-      <MapPage id={id}/>
+      <MapPage noteId={noteId}/>
     </StorageContextProvider>
   )
 
