@@ -114,6 +114,7 @@ export default function MapContainer(props: { noteId: string }) {
     if (!geolocationRef.current) {
       locationFeatureRef.current && locationSourceRef.current?.addFeature(locationFeatureRef.current);
       initGeolocation(geolocationRef, mapRef, locationFeatureRef);
+      log("[INIT] Geolocation initialized");
     }
   }
 

@@ -4,6 +4,7 @@ import {Feature, Geolocation} from "ol";
 import Point from "ol/geom/Point";
 import {Fill, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
+import log from "../Logger";
 
 function initGeolocation(
   geolocationRef: MutableRefObject<Geolocation|undefined>,
@@ -18,6 +19,7 @@ function initGeolocation(
       projection: mapRef.current?.getView().getProjection(),
     });
     geolocationRef.current.on("change:position", () => {
+      log("[UPDATE] Updating location");
       const coordinates = geolocationRef.current?.getPosition();
       locationFeatureRef.current?.setGeometry(coordinates ? new Point(coordinates) : undefined);
     });
