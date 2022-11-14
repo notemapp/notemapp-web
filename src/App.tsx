@@ -28,9 +28,9 @@ function App() {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
-    .register('%PUBLIC_URL%/service-worker.js')
+    .register('/service-worker.js')
     .then(() => log('[Service Worker] Registered successfully'))
-    .catch(() => log('[Service Worker] Registration failed'));
+    .catch((e) => log('[Service Worker] Registration failed', e));
 } else {
   console.log('[Service Worker] This browser does not support Service Workers');
 }
