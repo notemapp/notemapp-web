@@ -1,0 +1,14 @@
+{
+  "short_name": "notemapp",
+  "name": "notemapp",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "display": "fullscreen"
+}
