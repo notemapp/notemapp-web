@@ -19,6 +19,8 @@ function initFeaturesSource(
         if (source.current && features) {
           source.current.addFeatures(new GeoJSON().readFeatures(features));
           log("[INIT] Loaded features from store");
+        } else {
+          log("[INIT] No features found in store");
         }
       }
     });
