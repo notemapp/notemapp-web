@@ -6,10 +6,11 @@ import VectorSource from "ol/source/Vector";
 import {DrawType, toGeometryFeature} from "../DrawType";
 import {Draw} from "ol/interaction";
 import {DrawEvent} from "ol/interaction/Draw";
-import {set} from "idb-keyval";
+import {set, update} from "idb-keyval";
 import {GeoJSON} from "ol/format";
 import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
+import {updateNoteMeta} from "../../components/MapContainer";
 
 function initUndoInteraction(
   interactionRef: MutableRefObject<any|undefined>,
@@ -59,6 +60,8 @@ function updateDrawInteraction(
     features = features.concat(event.feature); // Source is not updated yet, add the new feature manually
     set(noteId, new GeoJSON().writeFeatures(features), storageContext?.noteStoreRef.current)
       .then(() => log("[UPDATE] Add new feature"));
+    update(noteId, (note) => updateNoteMeta(note), storageContext?.noteMetaStoreRef.current)
+      .then(() => log("[UPDATE] Updated note modifiedOn"));
   });
 
   log('[UPDATE] Change drawType:', drawType);

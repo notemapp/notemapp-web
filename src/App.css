@@ -2,3 +2,8 @@
 .ol-attribution.ol-uncollapsible {
     bottom: 3rem!important;
 }
+
+/* Hide default map controls */
+.ol-control {
+    display: none;
+}

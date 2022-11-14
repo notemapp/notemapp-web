@@ -13,7 +13,7 @@ export default function SideToolbar(props: {
   const buttonClass = tracking ? "bg-blue-500 text-white rounded" : "";
 
   return (
-    <div className="absolute top-0 right-0 w-12 h-auto bg-white">
+    <div className="absolute top-12 right-0 w-12 h-auto bg-white">
       <div className="w-full h-full flex justify-between py-4">
         <button className={buttonClass} onClick={onLocate}>Pos</button>
       </div>

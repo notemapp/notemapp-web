@@ -23,6 +23,13 @@ import {initMap} from "../core/controller/MapController";
 import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
 import {Note} from "../core/Note";
 
+export const updateNoteMeta = (note: Note) => {
+  return {
+    ...note,
+    modifiedOn: new Date().toISOString()
+  }
+}
+
 export default function MapContainer(props: { noteId: string }) {
 
   const noteId = props.noteId;
@@ -63,12 +70,6 @@ export default function MapContainer(props: { noteId: string }) {
     drawTypeRef.current = type;
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
       mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext);
-  }
-  const updateNoteMeta = (note: Note) => {
-    return {
-      ...note,
-      modifiedOn: new Date().toISOString()
-    }
   }
   const updateNotesStore = () => {
     set(
