@@ -28,7 +28,7 @@ function App() {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
-    .register('./service-worker.js')
+    .register('%PUBLIC_URL%/service-worker.js')
     .then(() => log('[Service Worker] Registered successfully'))
     .catch(() => log('[Service Worker] Registration failed'));
 } else {
