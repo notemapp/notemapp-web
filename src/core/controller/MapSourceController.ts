@@ -21,14 +21,13 @@ function initFeaturesSource(
           log("[INIT] Loaded features from store");
         } else {
           log("[INIT] No features found in store");
+          get(noteId).then((value) => {
+            if (!value && source.current) {
+              set(noteId, new GeoJSON().writeFeatures(source.current.getFeatures()), storageContext?.noteStoreRef.current)
+                .then(() => log("[INIT] Create new note"));
+            }
+          });
         }
-      }
-    });
-
-    get(noteId).then((value) => {
-      if (value === undefined && source.current) {
-        set(noteId, new GeoJSON().writeFeatures(source.current.getFeatures()), storageContext?.noteStoreRef.current)
-          .then(() => log("[INIT] Create new note"));
       }
     });
 
