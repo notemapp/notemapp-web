@@ -34,7 +34,7 @@ function initTileLayerGroup(
           visible: false
         }),
         new TileLayer({
-          source: new XYZ({url: 'https://stamen-tiles.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg'}),
+          source: new XYZ({url: `https://tile-proxy-bing.alessiovierti.workers.dev/Aerial/{z}/{x}/{y}.jpg?key=none`}),
           visible: false
         })
       ]
