@@ -2,25 +2,24 @@ import {get as getProjection} from "ol/proj";
 import Map from "ol/Map";
 import {View} from "ol";
 import {MutableRefObject} from "react";
-import TileLayer from "ol/layer/Tile";
-import {OSM} from "ol/source";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import {get, set} from "idb-keyval";
 import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
+import LayerGroup from "ol/layer/Group";
 
 function initMap(
   mapRef: MutableRefObject<Map|undefined>,
   mapContainerRef: any,
-  tileLayerRef: MutableRefObject<TileLayer<OSM>|undefined>,
+  tileLayerGroupRef: MutableRefObject<LayerGroup|undefined>,
   featuresLayerRef: MutableRefObject<VectorLayer<VectorSource>|undefined>,
   locationLayerRef: MutableRefObject<VectorLayer<VectorSource>|undefined>,
   noteId: string,
   storageContext: StorageContextInterface|null
 ): void {
 
-  if (!mapRef.current && tileLayerRef.current && featuresLayerRef.current && locationLayerRef.current) {
+  if (!mapRef.current && tileLayerGroupRef.current && featuresLayerRef.current && locationLayerRef.current) {
 
     // Avoid panning too much
     // @ts-ignore
@@ -31,7 +30,7 @@ function initMap(
     // Instantiate map
     mapRef.current = new Map({
       target: mapContainerRef.current,
-      layers: [tileLayerRef.current, featuresLayerRef.current, locationLayerRef.current],
+      layers: [tileLayerGroupRef.current, featuresLayerRef.current, locationLayerRef.current],
       view: new View({
         center: [-11000000, 4600000],
         zoom: 4,

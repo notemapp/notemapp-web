@@ -1,6 +1,4 @@
 import {useContext, useEffect, useRef} from "react";
-import TileLayer from "ol/layer/Tile";
-import {OSM} from "ol/source";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import {Feature, Geolocation} from "ol";
@@ -22,6 +20,9 @@ import {initLayers} from "../core/controller/MapLayerController";
 import {initMap} from "../core/controller/MapController";
 import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
 import {Note} from "../core/Note";
+import LayerGroup from "ol/layer/Group";
+import LayerToolbar from "./LayerToolbar";
+import {TileLayerType} from "../core/TileLayerType";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -47,7 +48,7 @@ export default function MapContainer(props: { noteId: string }) {
   // Layers
   const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
   const locationLayerRef = useRef<VectorLayer<VectorSource>>();
-  const tileLayerRef = useRef<TileLayer<OSM>>();
+  const tileLayerGroupRef = useRef<LayerGroup>();
 
   // Interactions
   // @ts-ignore
@@ -94,11 +95,11 @@ export default function MapContainer(props: { noteId: string }) {
     // @ts-ignore
     initSources(noteId, storageContext, featuresSourceRef, locationSourceRef);
     // @ts-ignore
-    initLayers(featuresLayerRef, locationLayerRef, tileLayerRef, featuresSourceRef, locationSourceRef);
+    initLayers(featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef);
 
     if (!mapRef.current
-      && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerRef.current) {
-      initMap(mapRef, mapContainerRef, tileLayerRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
+      && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerGroupRef.current) {
+      initMap(mapRef, mapContainerRef, tileLayerGroupRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
     }
 
     initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);
@@ -118,6 +119,22 @@ export default function MapContainer(props: { noteId: string }) {
     }
   }
 
+  const onTileLayerToggle = (tileLayerType: TileLayerType) => {
+    if (mapRef.current) {
+      mapRef.current.getLayerGroup().getLayers().forEach((layer) => {
+        if (layer instanceof LayerGroup) {
+          layer.getLayers().forEach((l, i) => {
+            if (i === tileLayerType.valueOf()) {
+              l.setVisible(true);
+            } else {
+              l.setVisible(false);
+            }
+          });
+        }
+      });
+    }
+  }
+
   return (
     <div>
       <div ref={mapContainerRef} className={style.mapContainer}></div>
@@ -130,6 +147,7 @@ export default function MapContainer(props: { noteId: string }) {
         onRedo={onRedo}
       />
       <SideToolbar onLocate={onLocate}/>
+      <LayerToolbar onTileLayerToggle={onTileLayerToggle} />
     </div>
   );
 
