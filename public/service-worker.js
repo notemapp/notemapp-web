@@ -25,7 +25,7 @@ self.addEventListener('fetch', (event) =>
             else {                          // Cache miss
               const {hostname} = new URL(event.request.url);
               const response = fetch(event.request);
-              if (cachedHosts.includes(hostname)) {
+              if (cachedHosts.includes(hostname) && response.ok) {
                 caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, new Response(response.body, response)));
               }
               return response;
