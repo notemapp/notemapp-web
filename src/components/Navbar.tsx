@@ -1,12 +1,14 @@
 import {useNavigate} from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar(props: {
+  onOpenDrawer: () => void;
+}) {
 
   const navigate = useNavigate();
 
   return (
     <div className="absolute top-0 left-0 h-12 w-full bg-white z-10">
-      <div className="w-full h-full flex justify-left px-0">
+      <div className="w-full h-full flex justify-between px-0">
         <button
           onClick={() => navigate('/')}
           className="w-12 h-full rounded flex justify-center items-center hover:bg-gray-300 group relative"
@@ -17,6 +19,17 @@ export default function Navbar() {
           </svg>
           <span className="w-auto absolute hidden group-hover:flex -left-0 -bottom-0 translate-y-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Back</span>
         </button>
+        <button
+          onClick={props.onOpenDrawer}
+          className="w-12 h-full rounded flex justify-center items-center hover:bg-gray-300 group relative"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+               stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5"/>
+          </svg>
+        </button>
+
       </div>
     </div>
   );

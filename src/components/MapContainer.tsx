@@ -1,4 +1,4 @@
-import {useContext, useEffect, useRef} from "react";
+import {MutableRefObject, useContext, useEffect, useRef} from "react";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import {Feature, Geolocation} from "ol";
@@ -31,15 +31,18 @@ export const updateNoteMeta = (note: Note) => {
   }
 }
 
-export default function MapContainer(props: { noteId: string }) {
+export default function MapContainer(props: {
+  noteId: string,
+  mapRef: MutableRefObject<Map|undefined>
+}) {
 
   const noteId = props.noteId;
 
   const storageContext = useContext(StorageContext);
 
   // Map
-  const mapRef = useRef<Map>();
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = props.mapRef;
 
   // Sources
   const featuresSourceRef = useRef<VectorSource>();

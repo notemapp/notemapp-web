@@ -60,4 +60,71 @@ function initMap(
 
 }
 
-export { initMap };
+function exportAsImage(
+  map: Map
+): void {
+
+  map.once('rendercomplete', function () {
+    const mapCanvas = document.createElement('canvas');
+    const size = map.getSize();
+    // @ts-ignore
+    mapCanvas.width = size[0];
+    // @ts-ignore
+    mapCanvas.height = size[1];
+    const mapContext = mapCanvas.getContext('2d');
+    Array.prototype.forEach.call(
+      map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
+      function (canvas) {
+        if (canvas.width > 0) {
+          const opacity =
+            canvas.parentNode.style.opacity || canvas.style.opacity;
+          // @ts-ignore
+          mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+          let matrix;
+          const transform = canvas.style.transform;
+          if (transform) {
+            // Get the transform parameters from the style's transform matrix
+            matrix = transform
+              .match(/^matrix\(([^\(]*)\)$/)[1]
+              .split(',')
+              .map(Number);
+          } else {
+            matrix = [
+              parseFloat(canvas.style.width) / canvas.width,
+              0,
+              0,
+              parseFloat(canvas.style.height) / canvas.height,
+              0,
+              0,
+            ];
+          }
+          // Apply the transform to the export map context
+          CanvasRenderingContext2D.prototype.setTransform.apply(
+            mapContext,
+            matrix
+          );
+          const backgroundColor = canvas.parentNode.style.backgroundColor;
+          if (backgroundColor) {
+            // @ts-ignore
+            mapContext.fillStyle = backgroundColor;
+            // @ts-ignore
+            mapContext.fillRect(0, 0, canvas.width, canvas.height);
+          }
+          // @ts-ignore
+          mapContext.drawImage(canvas, 0, 0);
+        }
+      }
+    );
+    // @ts-ignore
+    mapContext.globalAlpha = 1;
+    // @ts-ignore
+    mapContext.setTransform(1, 0, 0, 1, 0, 0);
+    const newTab = window.open();
+    newTab?.document.write('<img alt="exported map image" src="' + mapCanvas.toDataURL() + '"/>');
+  });
+
+  map.renderSync();
+
+}
+
+export { initMap, exportAsImage };
