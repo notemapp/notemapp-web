@@ -119,8 +119,11 @@ function exportAsImage(
     mapContext.globalAlpha = 1;
     // @ts-ignore
     mapContext.setTransform(1, 0, 0, 1, 0, 0);
-    const newTab = window.open();
-    newTab?.document.write('<img alt="exported map image" src="' + mapCanvas.toDataURL() + '"/>');
+    let link = document.createElement('a');
+    link.download = 'map.png';
+    link.href = mapCanvas.toDataURL();
+    link.click();
+    document.removeChild(link);
   });
 
   map.renderSync();
