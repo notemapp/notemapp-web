@@ -34,7 +34,8 @@ function initMap(
       view: new View({
         center: [-11000000, 4600000],
         zoom: 4,
-        extent: extent
+        extent: extent,
+        maxZoom: 19,
       })
     });
 
