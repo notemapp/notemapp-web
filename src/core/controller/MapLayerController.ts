@@ -12,7 +12,14 @@ function initVectorLayer(
 
   if (!layer.current) {
     layer.current = new VectorLayer({
-      source: source.current
+      source: source.current,
+      style: {
+        'fill-color': 'rgba(59, 130, 246, 0.3)',
+        'stroke-color': 'rgb(59, 130, 246)',
+        'stroke-width': 3,
+        'circle-radius': 7,
+        'circle-fill-color': 'rgba(59, 130, 246, 0.3)',
+      },
     });
   }
 
