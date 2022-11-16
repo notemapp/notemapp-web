@@ -33,7 +33,8 @@ export const updateNoteMeta = (note: Note) => {
 
 export default function MapContainer(props: {
   noteId: string,
-  mapRef: MutableRefObject<Map|undefined>
+  mapRef: MutableRefObject<Map|undefined>,
+  featuresSourceRef: MutableRefObject<VectorSource|undefined>,
 }) {
 
   const noteId = props.noteId;
@@ -45,7 +46,7 @@ export default function MapContainer(props: {
   const mapRef = props.mapRef;
 
   // Sources
-  const featuresSourceRef = useRef<VectorSource>();
+  const featuresSourceRef = props.featuresSourceRef;
   const locationSourceRef = useRef<VectorSource>();
 
   // Layers
