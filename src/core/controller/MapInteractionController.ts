@@ -13,11 +13,12 @@ import {StorageContextInterface} from "../../components/StorageContext";
 import {updateNoteMeta} from "../../components/MapContainer";
 import {Feature, MapBrowserEvent, Overlay} from "ol";
 import {Point} from "ol/geom";
-import {Fill, Icon, Stroke, Style} from "ol/style";
+import {Fill, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import {EventsKey} from "ol/events";
 import {unByKey} from "ol/Observable";
 import {SelectEvent} from "ol/interaction/Select";
+import {getStyleByFeatureType, getStyleByInteractionType} from "./FeatureStyleController";
 
 function initUndoInteraction(
   interactionRef: MutableRefObject<any|undefined>,
@@ -57,15 +58,7 @@ function addMarker(
   const markerFeature = new Feature({
     label: label,
   });
-  markerFeature.setStyle(
-      new Style({
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({ color: '#d32f2f' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        })
-      })
-  );
+  markerFeature.setStyle(getStyleByFeatureType("Point"));
   markerFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
   layerSourceRef.current.addFeature(markerFeature);
 
@@ -138,16 +131,16 @@ function updateDrawInteraction(
   if (drawType === InteractionType.Select) {
     const selected = new Style({
       fill: new Fill({
-        color: '#FDD835',
+        color: 'yellow',
       }),
       stroke: new Stroke({
-        color: 'rgba(255, 255, 255, 1)',
-        width: 2,
+        color: 'yellow',
+        width: 4,
       }),
       image: new CircleStyle({
         radius: 6,
-        fill: new Fill({ color: '#FDD835' }),
-        stroke: new Stroke({ color: '#fff', width: 2 }),
+        fill: new Fill({ color: 'yellow' }),
+        stroke: new Stroke({ color: 'yellow', width: 2 }),
       })
     });
     function selectStyle(feature: any) {
@@ -174,7 +167,8 @@ function updateDrawInteraction(
     // @ts-ignore
     type: type,
     geometryFunction: geometryFunction,
-    freehand: freeHand
+    freehand: freeHand,
+    style: getStyleByInteractionType(drawType),
   });
   mapRef.current.addInteraction(interactionRef.current);
 
