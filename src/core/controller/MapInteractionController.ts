@@ -184,4 +184,4 @@ function updateDrawInteraction(
 
 }
 
-export { initUndoInteraction, updateDrawInteraction, addMarker };
+export { initUndoInteraction, updateDrawInteraction, addMarker, updateLocalFeatures };

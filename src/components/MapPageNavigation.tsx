@@ -1,34 +1,46 @@
-import {MutableRefObject, useState} from "react";
+import {MutableRefObject, useContext, useState} from "react";
 import Navbar from "./Navbar";
 import MapPageDrawer from "./MapPageDrawer";
 import {exportAsImage} from "../core/controller/MapController";
 import {GeoJSON} from "ol/format";
 import Map from "ol/Map";
 import VectorSource from "ol/source/Vector";
+import {fileOpen, fileSave} from "browser-fs-access";
+import {updateLocalFeatures} from "../core/controller/MapInteractionController";
+import {StorageContext} from "./StorageContext";
 
 export default function MapPageNavigation(props: {
   mapRef: MutableRefObject<Map|undefined>,
   featuresSourceRef: MutableRefObject<VectorSource|undefined>,
+  noteId: string
 }) {
 
+  const storageContext = useContext(StorageContext);
+  const noteId = props.noteId;
   const mapRef = props.mapRef;
   const featuresSourceRef = props.featuresSourceRef;
 
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
-  const onExportAsImage = () => mapRef.current && exportAsImage(mapRef.current);
+  const onExportAsImage = () => {
+    if (mapRef.current) {
+      exportAsImage(mapRef.current);
+      setDrawerOpen(false);
+    }
+  }
 
   const onImportFromFile = async () => {
     if (featuresSourceRef.current) {
-      const [fileHandle] = await window.showOpenFilePicker();
-      const file = await fileHandle.getFile();
+      const file = await fileOpen();
       const text = await file.text();
       try {
         const features = new GeoJSON().readFeatures(text);
         featuresSourceRef.current.addFeatures(features);
+        updateLocalFeatures(noteId, featuresSourceRef.current.getFeatures(), storageContext);
       } catch (e) {
         alert('Invalid GeoJSON');
       }
+      setDrawerOpen(false);
     }
   }
 
@@ -36,15 +48,11 @@ export default function MapPageNavigation(props: {
     if (featuresSourceRef.current) {
       const features = featuresSourceRef.current.getFeatures();
       const text = new GeoJSON().writeFeatures(features);
-      const fileHandle = await window.showSaveFilePicker({
-        types: [{
-          description: 'GeoJSON',
-          accept: {'application/JSON': ['.json']}
-        }],
+      await fileSave(new Blob([text], {type: 'application/json'}), {
+        fileName: 'map.json',
+        extensions: ['.json'],
       });
-      const writable = await fileHandle.createWritable();
-      await writable.write(text);
-      await writable.close();
+      setDrawerOpen(false);
     }
   }
 

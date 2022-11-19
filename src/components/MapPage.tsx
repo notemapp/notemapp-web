@@ -17,6 +17,7 @@ export default function MapPage() {
       <MapPageNavigation
         mapRef={mapRef}
         featuresSourceRef={featuresSourceRef}
+        noteId={noteId}
       />
       <MapContainer noteId={noteId} mapRef={mapRef} featuresSourceRef={featuresSourceRef} />
     </>

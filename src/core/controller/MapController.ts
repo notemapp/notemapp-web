@@ -9,6 +9,7 @@ import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
 import LayerGroup from "ol/layer/Group";
 import {EventsKey} from "ol/events";
+import {fileSave} from "browser-fs-access";
 
 function initMap(
   mapRef: MutableRefObject<Map|undefined>,
@@ -140,11 +141,14 @@ function exportAsImage(
     mapContext.globalAlpha = 1;
     // @ts-ignore
     mapContext.setTransform(1, 0, 0, 1, 0, 0);
-    let link = document.createElement('a');
-    link.download = 'map.png';
-    link.href = mapCanvas.toDataURL();
-    link.click();
-    document.removeChild(link);
+    mapCanvas.toBlob((imageBlob) => {
+      imageBlob &&
+      fileSave(imageBlob, {
+        fileName: 'map.png',
+        description: 'Map image',
+        extensions: ['.png'],
+      });
+    })
   });
 
   map.renderSync();
