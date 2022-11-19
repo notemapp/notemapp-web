@@ -4,7 +4,8 @@ enum DrawType {
   None = 0,
   Line = 1,
   Polygon = 2,
-  Rectangle = 3
+  Rectangle = 3,
+  Marker = 4,
 }
 
 interface GeometryFeature {

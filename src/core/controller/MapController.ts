@@ -1,6 +1,6 @@
 import {get as getProjection} from "ol/proj";
 import Map from "ol/Map";
-import {View} from "ol";
+import {Overlay, View} from "ol";
 import {MutableRefObject} from "react";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
@@ -11,6 +11,7 @@ import LayerGroup from "ol/layer/Group";
 
 function initMap(
   mapRef: MutableRefObject<Map|undefined>,
+  popupOverlayRef: MutableRefObject<Overlay|undefined>,
   mapContainerRef: any,
   tileLayerGroupRef: MutableRefObject<LayerGroup|undefined>,
   featuresLayerRef: MutableRefObject<VectorLayer<VectorSource>|undefined>,
@@ -19,7 +20,7 @@ function initMap(
   storageContext: StorageContextInterface|null
 ): void {
 
-  if (!mapRef.current && tileLayerGroupRef.current && featuresLayerRef.current && locationLayerRef.current) {
+  if (!mapRef.current && tileLayerGroupRef.current && featuresLayerRef.current && locationLayerRef.current && popupOverlayRef.current) {
 
     // Avoid panning too much
     // @ts-ignore
@@ -31,6 +32,7 @@ function initMap(
     mapRef.current = new Map({
       target: mapContainerRef.current,
       layers: [tileLayerGroupRef.current, featuresLayerRef.current, locationLayerRef.current],
+      overlays: [popupOverlayRef.current],
       view: new View({
         center: [-11000000, 4600000],
         zoom: 4,

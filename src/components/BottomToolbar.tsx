@@ -25,7 +25,7 @@ export function BottomToolbar(props: {
   }
   const buttonToolbarClass = (thisDrawType: DrawType) => {
     const baseClass = "w-12 h-full rounded flex justify-center items-center group relative";
-    const activeClass = DrawType.None !== thisDrawType ? "bg-blue-500 text-white rounded" : "text-black";
+    const activeClass = ![DrawType.None, DrawType.Marker].includes(thisDrawType) ? "bg-blue-500 text-white rounded" : "text-black";
     return baseClass + " " + activeClass;
   }
 
@@ -49,7 +49,7 @@ export function BottomToolbar(props: {
                     d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>
             </svg>
           </button>
-          <button className={buttonToolbarClass(drawType)}>
+          <div className={buttonToolbarClass(drawType)}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
                  stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round"
@@ -93,6 +93,14 @@ export function BottomToolbar(props: {
                 <span className="w-auto absolute hidden group-hover:flex right-0 translate-x-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Free hand mode</span>
               </button>
             </span>
+          </div>
+          <button onClick={() => onDrawTypeChange(DrawType.Marker)} className={buttonClassByDrawType(DrawType.Marker)}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+                 stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+            </svg>
           </button>
         </div>
         <div className="w-full h-full flex justify-end space-x-4">

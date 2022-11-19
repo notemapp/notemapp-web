@@ -1,7 +1,7 @@
 import {MutableRefObject, useContext, useEffect, useRef} from "react";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import {Feature, Geolocation} from "ol";
+import {Feature, Geolocation, Overlay} from "ol";
 import Map from "ol/Map";
 import {Draw} from "ol/interaction";
 import "ol/ol.css";
@@ -43,6 +43,9 @@ export default function MapContainer(props: {
 
   // Map
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const popupContainerRef = useRef<HTMLDivElement>(null);
+  const popupCloserRef = useRef<HTMLAnchorElement>(null);
+  const popupContentRef = useRef<HTMLDivElement>(null);
   const mapRef = props.mapRef;
 
   // Sources
@@ -53,6 +56,9 @@ export default function MapContainer(props: {
   const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
   const locationLayerRef = useRef<VectorLayer<VectorSource>>();
   const tileLayerGroupRef = useRef<LayerGroup>();
+
+  // Overlays
+  const popupOverlayRef = useRef<Overlay>();
 
   // Interactions
   // @ts-ignore
@@ -69,12 +75,12 @@ export default function MapContainer(props: {
     freeHandRef.current = !freeHandRef.current;
     log("[UPDATE] FreeHand:", freeHandRef.current);
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext);
+      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext, popupContentRef, popupOverlayRef);
   }
   const onDrawTypeChange = (type: DrawType) => {
     drawTypeRef.current = type;
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext);
+      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext, popupContentRef, popupOverlayRef);
   }
   const updateNotesStore = () => {
     set(
@@ -101,9 +107,20 @@ export default function MapContainer(props: {
     // @ts-ignore
     initLayers(featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef);
 
+    if (!popupOverlayRef.current) {
+      popupOverlayRef.current = new Overlay({
+        element: popupContainerRef.current || undefined,
+        autoPan: {
+          animation: {
+            duration: 250,
+          },
+        },
+      });
+    }
+
     if (!mapRef.current
       && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerGroupRef.current) {
-      initMap(mapRef, mapContainerRef, tileLayerGroupRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
+      initMap(mapRef, popupOverlayRef, mapContainerRef, tileLayerGroupRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
     }
 
     initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);
@@ -139,9 +156,23 @@ export default function MapContainer(props: {
     }
   }
 
+  useEffect(() => {
+    if (popupContainerRef.current && popupCloserRef.current && popupContentRef.current) {
+      popupCloserRef.current.onclick = function () {
+        popupOverlayRef.current?.setPosition(undefined);
+        popupCloserRef.current?.blur();
+        return false;
+      };
+    }
+  }, []);
+
   return (
     <div>
       <div ref={mapContainerRef} className={style.mapContainer}></div>
+      <div ref={popupContainerRef} className={style.olPopup}>
+        <a href="#" ref={popupCloserRef} className={style.olPopupCloser}></a>
+        <div ref={popupContentRef}></div>
+      </div>
       <BottomToolbar
         drawType={drawTypeRef.current}
         freeHand={freeHandRef.current}
