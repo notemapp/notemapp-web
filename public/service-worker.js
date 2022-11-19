@@ -5,12 +5,6 @@ const alwaysCache = [
   '/assets/tile-street.png',
 ];
 
-const cacheForOffline = [
-  '/index.html',
-  '/assets/index.081ff665.css',
-  '/assets/index.dec81e95.js'
-];
-
 const CACHE_VERSION = 'osm-tiles-v1';
 
 self.addEventListener('install', (event) =>
@@ -19,7 +13,6 @@ self.addEventListener('install', (event) =>
       .open(CACHE_VERSION)
       .then((cache) => {
         cache.addAll(alwaysCache);
-        cache.addAll(cacheForOffline);
       })
   )
 );
@@ -36,22 +29,24 @@ self.addEventListener('fetch', (event) =>
           .match(event.request)
           .then((response) => {
             if (response) {                 // Cache hit
-              const {pathname} = new URL(event.request.url);
+              const {pathname, hostname} = new URL(event.request.url);
               // Serve from cache static assets or cached items (when offline):
-              if (cacheForOffline.includes(pathname) && !navigator.onLine || alwaysCache.includes(pathname)) {
+              if (alwaysCache.includes(pathname) || cachedHosts.includes(hostname) || !navigator.onLine) {
+                console.log('Cache hit, serving from cache:', event.request.url);
                 return response;
               } else {
                 // Update cache if online:
                 response = fetch(event.request);
                 if (response.ok) {
+                  console.log('Cache hit but online, updating cache:', event.request.url);
                   caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, new Response(response.body, response)));
                 }
                 return response;
               }
             } else {                        // Cache miss
-              const {hostname} = new URL(event.request.url);
               const response = fetch(event.request);
-              if (cachedHosts.includes(hostname) && response.ok) {
+              if (response.ok) {
+                console.log('Cache miss, adding to cache:', event.request.url);
                 caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, new Response(response.body, response)));
               }
               return response;
