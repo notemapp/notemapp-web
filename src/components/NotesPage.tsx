@@ -1,8 +1,9 @@
 import {Note} from "../core/Note";
 import {useContext, useEffect, useRef, useState} from "react";
 import {StorageContext} from "./StorageContext";
-import {entries, set} from "idb-keyval";
+import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
+import log from "../core/Logger";
 
 export default function NotesPage() {
 
@@ -31,6 +32,25 @@ export default function NotesPage() {
 
   }
 
+  const onDeleteNote = (note: Note) => {
+    if (confirm('Are you sure you want to delete this note?')) {
+      del(note.id, storageContext?.noteMetaStoreRef.current).then(() => {
+        log("[DELETE] Note meta:", note.id);
+        setNotes(notes.filter((n) => n.id !== note.id));
+      });
+      del(note.id, storageContext?.noteStoreRef.current);
+      del(note.id, storageContext?.notePrefsStoreRef.current);
+    }
+  }
+
+  const onEditNote = (note: Note) => {
+    const newTitle = prompt("Enter a new title", note.title);
+    note.title = newTitle || "Untitled note";
+    set(note.id, note, storageContext?.noteMetaStoreRef.current).then(() => {
+      setNotes(notes.map((n) => n.id === note.id ? note : n));
+    });
+  }
+
   return (
     <div className="p-4">
       {
@@ -40,11 +60,16 @@ export default function NotesPage() {
       <ul className="py-2">
         {notes.map((note) => (
           <li key={note.id} >
-            <button onClick={() => navigate(`/map/${note.id}`)} className="w-full px-4 py-2 my-1 border border-1 border-black hover:bg-gray-300">
+            <div className="w-full px-4 py-2 my-1 border border-1 border-black hover:bg-gray-300">
               <span className="text-lg font-semibold">{note.title}</span>
               <div className="text-sm text-gray-500"> created on {note.createdOn}</div>
               <div className="text-sm text-gray-500"> modified on {note.modifiedOn} </div>
-            </button>
+              <div className="flex space-x-4">
+                <button onClick={() => navigate(`/map/${note.id}`)}>View</button>
+                <button onClick={() => onDeleteNote(note)}>Delete</button>
+                <button onClick={() => onEditNote(note)}>Edit</button>
+              </div>
+            </div>
           </li>
         ))}
       </ul>
