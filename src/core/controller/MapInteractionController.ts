@@ -76,8 +76,6 @@ function addMarker(
 
 }
 
-let lastInteractionKey: EventsKey|undefined = undefined;
-
 function updateDrawInteraction(
   drawType: DrawType,
   freeHand: boolean,
@@ -88,6 +86,7 @@ function updateDrawInteraction(
   storageContext: StorageContextInterface|null,
   popupContentRef: RefObject<HTMLDivElement|undefined>,
   popupOverlayRef: MutableRefObject<Overlay|undefined>,
+  mapInteractionKeys: MutableRefObject<Array<EventsKey>|undefined>
 ): void {
 
   if (!mapRef.current) return;
@@ -105,18 +104,32 @@ function updateDrawInteraction(
     }
   }
 
-  if (lastInteractionKey) {
-    unByKey(lastInteractionKey);
+  if (mapInteractionKeys.current) {
+    mapInteractionKeys.current.forEach(key => unByKey(key));
+    mapInteractionKeys.current = [];
   }
 
   if (interactionRef.current){
     mapRef.current.removeInteraction(interactionRef.current);
   }
 
-  if (drawType === DrawType.None) return;
+  if (drawType === DrawType.None) {
+    mapInteractionKeys.current?.push(mapRef.current.on('click', function (evt) {
+      const feature = mapRef.current?.forEachFeatureAtPixel(evt.pixel, function (feature) {
+        return feature;
+      });
+      popupOverlayRef.current?.setPosition(undefined);
+      if (!feature || !feature.get("label")) {
+        return;
+      }
+      popupOverlayRef.current?.setPosition(evt.coordinate);
+      if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("label")}</p>`;
+    }));
+    return;
+  }
 
   if (drawType === DrawType.Marker) {
-    lastInteractionKey = mapRef.current.on('singleclick', showPopup);
+    mapInteractionKeys.current?.push(mapRef.current.on('singleclick', showPopup));
     return;
   }
 

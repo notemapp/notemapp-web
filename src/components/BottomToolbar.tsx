@@ -1,5 +1,6 @@
 import {DrawType} from "../core/DrawType";
 import {useState} from "react";
+import log from "../core/Logger";
 
 export function BottomToolbar(props: {
   drawType: DrawType,
@@ -30,6 +31,7 @@ export function BottomToolbar(props: {
   }
 
   const onDrawTypeChange = (type: DrawType) => {
+    log("onDrawTypeChange", type);
     props.onDrawTypeChange(type);
     setDrawType(type);
   }

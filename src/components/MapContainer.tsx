@@ -23,6 +23,7 @@ import {Note} from "../core/Note";
 import LayerGroup from "ol/layer/Group";
 import LayerToolbar from "./LayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
+import {EventsKey} from "ol/events";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -64,6 +65,7 @@ export default function MapContainer(props: {
   // @ts-ignore
   const undoRedoInteractionRef = useRef<UndoRedo>();
   const drawInteractionRef = useRef<Draw>();
+  const mapInteractionKeys = useRef<EventsKey[]>([]);
 
   // Geolocation
   const geolocationRef = useRef<Geolocation>();
@@ -75,12 +77,14 @@ export default function MapContainer(props: {
     freeHandRef.current = !freeHandRef.current;
     log("[UPDATE] FreeHand:", freeHandRef.current);
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext, popupContentRef, popupOverlayRef);
+      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext,
+        popupContentRef, popupOverlayRef, mapInteractionKeys);
   }
   const onDrawTypeChange = (type: DrawType) => {
     drawTypeRef.current = type;
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext, popupContentRef, popupOverlayRef);
+      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext,
+        popupContentRef, popupOverlayRef, mapInteractionKeys);
   }
   const updateNotesStore = () => {
     set(
@@ -120,7 +124,7 @@ export default function MapContainer(props: {
 
     if (!mapRef.current
       && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerGroupRef.current) {
-      initMap(mapRef, popupOverlayRef, mapContainerRef, tileLayerGroupRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
+      initMap(mapRef, mapInteractionKeys, popupOverlayRef, popupContentRef, mapContainerRef, tileLayerGroupRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
     }
 
     initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);

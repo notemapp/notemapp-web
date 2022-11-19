@@ -1,17 +1,20 @@
 import {get as getProjection} from "ol/proj";
 import Map from "ol/Map";
 import {Overlay, View} from "ol";
-import {MutableRefObject} from "react";
+import {MutableRefObject, RefObject} from "react";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import {get, set} from "idb-keyval";
 import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
 import LayerGroup from "ol/layer/Group";
+import {EventsKey} from "ol/events";
 
 function initMap(
   mapRef: MutableRefObject<Map|undefined>,
+  mapInteractionKeys: MutableRefObject<EventsKey[]>,
   popupOverlayRef: MutableRefObject<Overlay|undefined>,
+  popupContentRef: RefObject<HTMLDivElement|undefined>,
   mapContainerRef: any,
   tileLayerGroupRef: MutableRefObject<LayerGroup|undefined>,
   featuresLayerRef: MutableRefObject<VectorLayer<VectorSource>|undefined>,
@@ -49,6 +52,20 @@ function initMap(
       set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
     });
+
+    mapInteractionKeys.current.push(
+        mapRef.current.on('click', function (evt) {
+          const feature = mapRef.current?.forEachFeatureAtPixel(evt.pixel, function (feature) {
+            return feature;
+          });
+          popupOverlayRef.current?.setPosition(undefined);
+          if (!feature || !feature.get("label")) {
+            return;
+          }
+          popupOverlayRef.current?.setPosition(evt.coordinate);
+          if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("label")}</p>`;
+        })
+    );
 
     get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
       if (view) {
