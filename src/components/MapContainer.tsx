@@ -8,7 +8,7 @@ import "ol/ol.css";
 import {set, update} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
-import {DrawType} from "../core/DrawType";
+import {InteractionType} from "../core/InteractionType";
 import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import log from "../core/Logger";
 import style from "./MapContainer.module.css";
@@ -74,7 +74,7 @@ export default function MapContainer(props: {
   // Geolocation
   const geolocationRef = useRef<Geolocation>();
 
-  const drawTypeRef = useRef<DrawType>(DrawType.None);
+  const drawTypeRef = useRef<InteractionType>(InteractionType.None);
   const freeHandRef = useRef<boolean>(false);
 
   const [selectedFeature, setSelectedFeature] = useState<boolean>(false);
@@ -95,7 +95,7 @@ export default function MapContainer(props: {
       mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, noteId, storageContext,
         popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
   }
-  const onDrawTypeChange = (type: DrawType) => {
+  const onInteractionTypeChange = (type: InteractionType) => {
     drawTypeRef.current = type;
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
       mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, noteId, storageContext,
@@ -201,9 +201,9 @@ export default function MapContainer(props: {
         <div ref={popupContentRef}></div>
       </div>
       <BottomToolbar
-        drawType={drawTypeRef.current}
-        freeHand={freeHandRef.current}
-        onDrawTypeChange={onDrawTypeChange}
+        interactionType={drawTypeRef.current}
+        isFreeHand={freeHandRef.current}
+        onInteractionTypeChange={onInteractionTypeChange}
         onFreeHandToggle={onFreeHandToggle}
         onUndo={onUndo}
         onRedo={onRedo}

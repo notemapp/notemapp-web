@@ -1,6 +1,6 @@
 import {createBox, GeometryFunction} from "ol/interaction/Draw";
 
-enum DrawType {
+enum InteractionType {
   None = 0,
   Line = 1,
   Polygon = 2,
@@ -14,18 +14,18 @@ interface GeometryFeature {
   geometryFunction: GeometryFunction|undefined
 }
 
-const toGeometryFeature = (drawType: DrawType): GeometryFeature => {
+const toGeometryFeature = (drawType: InteractionType): GeometryFeature => {
 
   let type = undefined;
   let geometryFunction = undefined;
   switch (drawType) {
-    case DrawType.Line:
+    case InteractionType.Line:
       type = 'LineString';
       break;
-    case DrawType.Polygon:
+    case InteractionType.Polygon:
       type = 'Polygon';
       break;
-    case DrawType.Rectangle:
+    case InteractionType.Rectangle:
       type = 'Circle';
       geometryFunction = createBox();
       break;
@@ -35,4 +35,6 @@ const toGeometryFeature = (drawType: DrawType): GeometryFeature => {
 
 }
 
-export { DrawType, toGeometryFeature };
+const DRAW_INTERACTIONS = [InteractionType.Line, InteractionType.Polygon, InteractionType.Rectangle];
+
+export { InteractionType, toGeometryFeature, DRAW_INTERACTIONS };

@@ -3,7 +3,7 @@ import UndoRedo from "ol-ext/interaction/UndoRedo";
 import Map from "ol/Map";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import {DrawType, toGeometryFeature} from "../DrawType";
+import {InteractionType, toGeometryFeature} from "../InteractionType";
 import {Draw, Select} from "ol/interaction";
 import {DrawEvent} from "ol/interaction/Draw";
 import {set, update} from "idb-keyval";
@@ -78,7 +78,7 @@ function addMarker(
 }
 
 function updateDrawInteraction(
-  drawType: DrawType,
+  drawType: InteractionType,
   freeHand: boolean,
   mapRef: MutableRefObject<Map|undefined>,
   interactionRef: MutableRefObject<Draw|undefined>,
@@ -120,7 +120,7 @@ function updateDrawInteraction(
     mapRef.current.removeInteraction(selectInteractionRef.current);
   }
 
-  if (drawType === DrawType.None) {
+  if (drawType === InteractionType.None) {
     mapInteractionKeys.current?.push(mapRef.current.on('click', function (evt) {
       const feature = mapRef.current?.forEachFeatureAtPixel(evt.pixel, function (feature) {
         return feature;
@@ -135,7 +135,7 @@ function updateDrawInteraction(
     return;
   }
 
-  if (drawType === DrawType.Select) {
+  if (drawType === InteractionType.Select) {
     const selected = new Style({
       fill: new Fill({
         color: '#FDD835',
@@ -162,7 +162,7 @@ function updateDrawInteraction(
     return;
   }
 
-  if (drawType === DrawType.Marker) {
+  if (drawType === InteractionType.Marker) {
     mapInteractionKeys.current?.push(mapRef.current.on('singleclick', showPopup));
     return;
   }
