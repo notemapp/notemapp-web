@@ -13,17 +13,17 @@ export function BottomToolbar(props: {
   const [interactionType, setInteractionType] = useState<InteractionType>(props.interactionType);
   const [isFreeHand, setFreeHand] = useState<boolean>(props.isFreeHand);
 
-  const buttonClass = (isActive: boolean) => {
-    const baseClass = "w-12 h-12 rounded flex justify-center items-center group relative";
-    const activeClass = isActive ? "bg-blue-500 text-white" : "text-black";
-    return `${baseClass} ${activeClass}`;
+  const buttonStaticClass = "w-12 h-12 rounded flex justify-center items-center group relative hover:bg-gray-300";
+  const buttonDynamicClass = (isActive: boolean) => {
+    const dynamicClass = isActive ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white" : "text-black";
+    return `${buttonStaticClass} ${dynamicClass}`;
   }
   const buttonClassByInteractionType = (thisInteractionType: InteractionType) =>
-      buttonClass(interactionType === thisInteractionType);
+      buttonDynamicClass(interactionType === thisInteractionType);
   const buttonClassByFreeHand = () =>
-      buttonClass(isFreeHand);
+      buttonDynamicClass(isFreeHand);
   const drawToolbarClassByInteractionType = (thisDrawType: InteractionType) =>
-      buttonClass(DRAW_INTERACTIONS.includes(thisDrawType));
+      buttonDynamicClass(DRAW_INTERACTIONS.includes(thisDrawType));
 
   const onDrawTypeChange = (type: InteractionType) => {
     props.onInteractionTypeChange(type);
@@ -52,7 +52,7 @@ export function BottomToolbar(props: {
             <span
                 className="
                 h-auto w-auto absolute flex -left-0 -top-0 -translate-y-full bg-white rounded-lg
-                text-center text-white text-sm grid grid-cols-1 invisible group-hover:visible
+                text-center text-white grid grid-cols-1 invisible group-hover:visible
                 "
             >
               <button
@@ -108,7 +108,7 @@ export function BottomToolbar(props: {
         <div className="w-full h-full flex justify-end space-x-4">
           <button
               onClick={props.onUndo}
-              className="w-12 h-full rounded flex justify-center items-center hover:bg-gray-300 group relative">
+              className={buttonStaticClass}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
             </svg>
@@ -116,7 +116,7 @@ export function BottomToolbar(props: {
           </button>
           <button
               onClick={props.onRedo}
-              className="w-12 h-full rounded flex justify-center items-center hover:bg-gray-300 group relative">
+              className={buttonStaticClass}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3"/>
             </svg>
