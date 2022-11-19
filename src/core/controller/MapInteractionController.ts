@@ -147,10 +147,10 @@ function updateDrawInteraction(
       return selected;
     }
     selectInteractionRef.current = new Select({style: selectStyle});
+    selectInteractionRef.current?.setHitTolerance(10);
     mapRef.current?.addInteraction(selectInteractionRef.current);
     selectInteractionRef.current?.on('select', function (e) {
       onSelectedFeature(e);
-      //sourceRef.current?.removeFeature(e.selected[0]);
     });
     return;
   }
