@@ -47,7 +47,8 @@ function initMap(
     mapRef.current.on('moveend', () => {
       const currentView = {
         center: mapRef.current?.getView().getCenter(),
-        zoom: mapRef.current?.getView().getZoom()
+        zoom: mapRef.current?.getView().getZoom(),
+        rotation: mapRef.current?.getView().getRotation()
       };
       set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
@@ -72,6 +73,7 @@ function initMap(
         const previousView = JSON.parse(view);
         mapRef.current?.getView().setCenter(previousView.center);
         mapRef.current?.getView().setZoom(previousView.zoom);
+        mapRef.current?.getView().setRotation(previousView.rotation||0);
         log("[LOAD] Restore previous view");
       }
     });
