@@ -34,14 +34,17 @@ function initTileLayerGroup(
       layers: [
         // TODO: load tiles from own proxy
         new TileLayer({
-          source: new XYZ({url: 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', crossOrigin: 'anonymous'})
+          source: new XYZ({url: 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', crossOrigin: 'anonymous'}),
+          preload: 4
         }),
         new TileLayer({
           source: new OSM({crossOrigin: 'anonymous'}),
+          preload: 4,
           visible: false
         }),
         new TileLayer({
           source: new XYZ({url: `https://tile-proxy-bing.alessiovierti.workers.dev/Aerial/{z}/{x}/{y}.jpg?key=none`, crossOrigin: 'anonymous'}),
+          preload: 4,
           visible: false
         })
       ]
