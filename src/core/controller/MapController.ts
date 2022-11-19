@@ -50,7 +50,7 @@ function initMap(
         zoom: mapRef.current?.getView().getZoom(),
         rotation: mapRef.current?.getView().getRotation()
       };
-      update(noteId, (prevView) => {return {...prevView, ...currentView}}, storageContext?.notePrefsStoreRef.current)
+      update(noteId, (prevView) => {return {layer: 0, ...prevView, ...currentView}}, storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
     });
 
