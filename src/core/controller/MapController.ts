@@ -4,7 +4,7 @@ import {Overlay, View} from "ol";
 import {MutableRefObject, RefObject} from "react";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import {get, set} from "idb-keyval";
+import {get, set, update} from "idb-keyval";
 import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
 import LayerGroup from "ol/layer/Group";
@@ -50,7 +50,7 @@ function initMap(
         zoom: mapRef.current?.getView().getZoom(),
         rotation: mapRef.current?.getView().getRotation()
       };
-      set(noteId, JSON.stringify(currentView), storageContext?.notePrefsStoreRef.current)
+      update(noteId, (prevView) => {return {...prevView, ...currentView}}, storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
     });
 
@@ -68,9 +68,8 @@ function initMap(
         })
     );
 
-    get(noteId, storageContext?.notePrefsStoreRef.current).then((view: string) => {
-      if (view) {
-        const previousView = JSON.parse(view);
+    get(noteId, storageContext?.notePrefsStoreRef.current).then((previousView: any) => {
+      if (previousView) {
         mapRef.current?.getView().setCenter(previousView.center);
         mapRef.current?.getView().setZoom(previousView.zoom);
         mapRef.current?.getView().setRotation(previousView.rotation||0);

@@ -25,6 +25,7 @@ import LayerToolbar from "./LayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
+import {tile} from "ol/loadingstrategy";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -132,7 +133,7 @@ export default function MapContainer(props: {
     // @ts-ignore
     initSources(noteId, storageContext, featuresSourceRef, locationSourceRef);
     // @ts-ignore
-    initLayers(featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef);
+    initLayers(noteId, featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef, storageContext);
 
     if (!popupOverlayRef.current) {
       popupOverlayRef.current = new Overlay({
@@ -169,6 +170,9 @@ export default function MapContainer(props: {
 
   const onTileLayerToggle = (tileLayerType: TileLayerType) => {
     if (mapRef.current) {
+      update(noteId, (note) => {return {...note, layer: tileLayerType.valueOf()}}, storageContext?.notePrefsStoreRef.current).then(() => {
+        log("[UPDATE] TileLayer:", tileLayerType);
+      })
       mapRef.current.getLayerGroup().getLayers().forEach((layer) => {
         if (layer instanceof LayerGroup) {
           layer.getLayers().forEach((l, i) => {
