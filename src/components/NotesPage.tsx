@@ -60,7 +60,7 @@ export default function NotesPage() {
       <ul className="py-2">
         {notes.map((note) => (
           <li key={note.id} >
-            <div className="w-full px-4 py-2 my-1 border border-1 border-black hover:bg-gray-300">
+            <div className="w-full px-4 py-2 my-1 border border-1 border-black">
               <span className="text-lg font-semibold">{note.title}</span>
               <div className="text-sm text-gray-500"> created on {note.createdOn}</div>
               <div className="text-sm text-gray-500"> modified on {note.modifiedOn} </div>
