@@ -7,3 +7,10 @@
 .ol-control {
     display: none;
 }
+
+/* Disable selection */
+body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
