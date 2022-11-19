@@ -1,9 +1,9 @@
-import {MutableRefObject, useContext, useEffect, useRef} from "react";
+import {MutableRefObject, useContext, useEffect, useRef, useState} from "react";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import {Feature, Geolocation, Overlay} from "ol";
 import Map from "ol/Map";
-import {Draw} from "ol/interaction";
+import {Draw, Select} from "ol/interaction";
 import "ol/ol.css";
 import {set, update} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
@@ -24,6 +24,7 @@ import LayerGroup from "ol/layer/Group";
 import LayerToolbar from "./LayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import {EventsKey} from "ol/events";
+import {SelectEvent} from "ol/interaction/Select";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -65,7 +66,10 @@ export default function MapContainer(props: {
   // @ts-ignore
   const undoRedoInteractionRef = useRef<UndoRedo>();
   const drawInteractionRef = useRef<Draw>();
+  const selectInteractionRef = useRef<Select>();
   const mapInteractionKeys = useRef<EventsKey[]>([]);
+
+  const selectedFeatureRef = useRef<Feature>();
 
   // Geolocation
   const geolocationRef = useRef<Geolocation>();
@@ -73,18 +77,29 @@ export default function MapContainer(props: {
   const drawTypeRef = useRef<DrawType>(DrawType.None);
   const freeHandRef = useRef<boolean>(false);
 
+  const [selectedFeature, setSelectedFeature] = useState<boolean>(false);
+  const onSelectedFeature = (event: SelectEvent) => {
+    if (event.selected.length > 0) {
+      selectedFeatureRef.current = event.selected[0];
+      setSelectedFeature(true);
+    } else {
+      selectedFeatureRef.current = undefined;
+      setSelectedFeature(false);
+    }
+  }
+
   const onFreeHandToggle = () => {
     freeHandRef.current = !freeHandRef.current;
     log("[UPDATE] FreeHand:", freeHandRef.current);
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext,
-        popupContentRef, popupOverlayRef, mapInteractionKeys);
+      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, noteId, storageContext,
+        popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
   }
   const onDrawTypeChange = (type: DrawType) => {
     drawTypeRef.current = type;
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, featuresSourceRef, noteId, storageContext,
-        popupContentRef, popupOverlayRef, mapInteractionKeys);
+      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, noteId, storageContext,
+        popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
   }
   const updateNotesStore = () => {
     set(
@@ -94,6 +109,14 @@ export default function MapContainer(props: {
     ).then(() =>
       update(noteId, (note) => updateNoteMeta(note), storageContext?.noteMetaStoreRef.current)
     );
+  }
+  const onDeleteFeature = () => {
+    if (selectedFeatureRef.current) {
+      featuresSourceRef.current?.removeFeature(selectedFeatureRef.current);
+      selectedFeatureRef.current = undefined;
+      setSelectedFeature(false);
+      updateNotesStore();
+    }
   }
   const onUndo = () => {
     undoRedoInteractionRef.current.undo();
@@ -185,7 +208,7 @@ export default function MapContainer(props: {
         onUndo={onUndo}
         onRedo={onRedo}
       />
-      <SideToolbar onLocate={onLocate}/>
+      <SideToolbar onLocate={onLocate} onDeleteFeature={onDeleteFeature} selectedFeature={selectedFeature} />
       <LayerToolbar onTileLayerToggle={onTileLayerToggle} />
     </div>
   );

@@ -6,6 +6,7 @@ enum DrawType {
   Polygon = 2,
   Rectangle = 3,
   Marker = 4,
+  Select = 5
 }
 
 interface GeometryFeature {

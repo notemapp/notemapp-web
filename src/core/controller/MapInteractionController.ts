@@ -4,7 +4,7 @@ import Map from "ol/Map";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import {DrawType, toGeometryFeature} from "../DrawType";
-import {Draw} from "ol/interaction";
+import {Draw, Select} from "ol/interaction";
 import {DrawEvent} from "ol/interaction/Draw";
 import {set, update} from "idb-keyval";
 import {GeoJSON} from "ol/format";
@@ -17,6 +17,7 @@ import {Fill, Icon, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import {EventsKey} from "ol/events";
 import {unByKey} from "ol/Observable";
+import {SelectEvent} from "ol/interaction/Select";
 
 function initUndoInteraction(
   interactionRef: MutableRefObject<any|undefined>,
@@ -81,12 +82,15 @@ function updateDrawInteraction(
   freeHand: boolean,
   mapRef: MutableRefObject<Map|undefined>,
   interactionRef: MutableRefObject<Draw|undefined>,
+  selectInteractionRef: MutableRefObject<Select|undefined>,
   sourceRef: MutableRefObject<VectorSource|undefined>,
   noteId: string,
   storageContext: StorageContextInterface|null,
   popupContentRef: RefObject<HTMLDivElement|undefined>,
   popupOverlayRef: MutableRefObject<Overlay|undefined>,
-  mapInteractionKeys: MutableRefObject<Array<EventsKey>|undefined>
+  mapInteractionKeys: MutableRefObject<Array<EventsKey>|undefined>,
+  selectedFeatureRef: MutableRefObject<Feature|undefined>,
+  onSelectedFeature: (event: SelectEvent) => void,
 ): void {
 
   if (!mapRef.current) return;
@@ -109,8 +113,11 @@ function updateDrawInteraction(
     mapInteractionKeys.current = [];
   }
 
-  if (interactionRef.current){
+  if (interactionRef.current) {
     mapRef.current.removeInteraction(interactionRef.current);
+  }
+  if (selectInteractionRef.current) {
+    mapRef.current.removeInteraction(selectInteractionRef.current);
   }
 
   if (drawType === DrawType.None) {
@@ -125,6 +132,33 @@ function updateDrawInteraction(
       popupOverlayRef.current?.setPosition(evt.coordinate);
       if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("label")}</p>`;
     }));
+    return;
+  }
+
+  if (drawType === DrawType.Select) {
+    const selected = new Style({
+      fill: new Fill({
+        color: '#FDD835',
+      }),
+      stroke: new Stroke({
+        color: 'rgba(255, 255, 255, 1)',
+        width: 2,
+      }),
+      image: new CircleStyle({
+        radius: 6,
+        fill: new Fill({ color: '#FDD835' }),
+        stroke: new Stroke({ color: '#fff', width: 2 }),
+      })
+    });
+    function selectStyle(feature: any) {
+      return selected;
+    }
+    selectInteractionRef.current = new Select({style: selectStyle});
+    mapRef.current?.addInteraction(selectInteractionRef.current);
+    selectInteractionRef.current?.on('select', function (e) {
+      onSelectedFeature(e);
+      //sourceRef.current?.removeFeature(e.selected[0]);
+    });
     return;
   }
 

@@ -1,7 +1,9 @@
 import {useState} from "react";
 
 export default function SideToolbar(props: {
-  onLocate: () => void
+  onLocate: () => void,
+  onDeleteFeature: () => void,
+  selectedFeature: boolean
 }) {
 
   const [tracking, setTracking] = useState<boolean>(false);
@@ -14,7 +16,7 @@ export default function SideToolbar(props: {
 
   return (
     <div className="absolute top-12 right-0 w-12 h-auto bg-white rounded">
-      <div className="w-full h-full flex justify-between py-0">
+      <div className="w-full h-full flex justify-between py-0 grid grid-cols-1">
         <button className={"text-white rounded w-full h-12 flex justify-center items-center group relative " + buttonClass} onClick={onLocate}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
                stroke="currentColor" className="w-6 h-6">
@@ -24,6 +26,18 @@ export default function SideToolbar(props: {
           </svg>
           <span className="w-auto absolute hidden group-hover:flex left-0 -translate-x-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Locate</span>
         </button>
+        { props.selectedFeature &&
+          <button className="text-white rounded w-full h-12 flex justify-center items-center group relative text-black"
+                  onClick={props.onDeleteFeature}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
+                 stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+            </svg>
+            <span
+                className="w-auto absolute hidden group-hover:flex left-0 -translate-x-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Delete selected</span>
+          </button>
+        }
       </div>
     </div>
   );
