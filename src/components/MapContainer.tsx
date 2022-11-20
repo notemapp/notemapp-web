@@ -93,13 +93,13 @@ export default function MapContainer(props: {
     freeHandRef.current = !freeHandRef.current;
     log("[UPDATE] FreeHand:", freeHandRef.current);
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, noteId, storageContext,
+      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, featuresLayerRef, noteId, storageContext,
         popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
   }
   const onInteractionTypeChange = (type: InteractionType) => {
     drawTypeRef.current = type;
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, noteId, storageContext,
+      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, featuresLayerRef, noteId, storageContext,
         popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
   }
   const updateNotesStore = () => {

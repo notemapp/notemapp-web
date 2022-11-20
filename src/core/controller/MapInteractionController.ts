@@ -77,6 +77,7 @@ function updateDrawInteraction(
   interactionRef: MutableRefObject<Draw|undefined>,
   selectInteractionRef: MutableRefObject<Select|undefined>,
   sourceRef: MutableRefObject<VectorSource|undefined>,
+  layerRef: MutableRefObject<VectorLayer<VectorSource>|undefined>,
   noteId: string,
   storageContext: StorageContextInterface|null,
   popupContentRef: RefObject<HTMLDivElement|undefined>,
@@ -128,7 +129,7 @@ function updateDrawInteraction(
     return;
   }
 
-  if (drawType === InteractionType.Select) {
+  if (drawType === InteractionType.Select && layerRef.current) {
     const selected = new Style({
       fill: new Fill({
         color: 'yellow',
@@ -146,7 +147,10 @@ function updateDrawInteraction(
     function selectStyle(feature: any) {
       return selected;
     }
-    selectInteractionRef.current = new Select({style: selectStyle});
+    selectInteractionRef.current = new Select({
+      style: selectStyle,
+      layers: [layerRef.current],
+    });
     selectInteractionRef.current?.setHitTolerance(10);
     mapRef.current?.addInteraction(selectInteractionRef.current);
     selectInteractionRef.current?.on('select', function (e) {
