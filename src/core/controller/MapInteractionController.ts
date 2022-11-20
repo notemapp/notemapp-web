@@ -172,7 +172,7 @@ function updateDrawInteraction(
     type: type,
     geometryFunction: geometryFunction,
     freehand: freeHand,
-    style: getStyleByInteractionType(drawType),
+    //style: getStyleByInteractionType(drawType),
   });
   mapRef.current.addInteraction(interactionRef.current);
 

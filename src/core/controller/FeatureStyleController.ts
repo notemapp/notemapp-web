@@ -49,6 +49,7 @@ function getStyleByFeatureType(type: string): Style {
 }
 
 function getStyleByInteractionType(interactionType: InteractionType): Style {
+  console.log("getStyleByInteractionType", interactionType);
   // @ts-ignore
   return STYLES[toGeometryFeature(interactionType).type];
 }
