@@ -40,9 +40,13 @@ export default function NotesPage(props: {
 
   useEffect(() => {
     if (notes.length > 0 && isSignedIn && storageContext) {
-      syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress);
-      syncRemoteNotes(googleDrive, notes, storageContext, (note: Note) => {
-        setNotes([...notes, note]);
+      syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress).then(() => {
+        console.log("Synced local notes");
+        return syncRemoteNotes(googleDrive, notes, storageContext, (note: Note) => {
+          setNotes((oldNotes) => [...oldNotes, note]);
+        })
+      }).then(() => {
+        console.log("Synced remote notes");
       });
     }
   }, [isSignedIn]);

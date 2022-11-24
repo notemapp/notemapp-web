@@ -25,7 +25,7 @@ export interface GoogleDrive {
   deleteFileById: (fileId: string) => Promise<void>;
   deleteFileByName: (fileName: string) => Promise<void>;
   createFile: (fileName: string, content: string) => Promise<GoogleDriveFile>;
-  updateFileById: (fileId: string, content: string) => Promise<GoogleDriveFile>;
+  updateFileById: (fileId: string, fileName: string, content: string, mimeType: string) => Promise<GoogleDriveFile>;
   getFilesInAppDataFolder: () => Promise<GoogleDriveFile[]>;
 }
 
@@ -42,6 +42,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       });
       const json = await response.json();
       const files = json.files as GoogleDriveFile[];
+
       console.log("[INFO] Google Drive files in appdata folder:", files);
       return files.filter((file) => file.mimeType === "application/json");
 

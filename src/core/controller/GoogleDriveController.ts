@@ -27,7 +27,7 @@ async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContex
       } else {
         console.log("[SYNC] Local note is more recent, uploading", note.id);
         const noteContent = await get(note.id, storageContext.noteStoreRef.current);
-        await googleDrive.updateFileById(file.id, JSON.stringify(noteContent));
+        await googleDrive.updateFileById(file.id, note.id + '.json', JSON.stringify(noteContent), 'application/json');
         console.log("[SYNC] Note uploaded", note.id);
       }
     } else {
@@ -64,7 +64,7 @@ async function syncRemoteNotes(
       .filter((file) => file.name.endsWith(".json"))
       .filter((file) => !localNotesIds.includes(file.name.replace(".json", "")));
 
-    console.log("[SYNC] Found remote notes not on local:", remoteNotes);
+    console.log("[SYNC] Remote notes not on local:", remoteNotes);
 
     for (const remoteNote of remoteNotes) {
       const noteId = remoteNote.name.replace(".json", "");
@@ -80,7 +80,7 @@ async function syncRemoteNotes(
           title: "Synced note",
           createdOn: new Date(noteMeta.createdOn).toISOString(),
           modifiedOn: new Date(noteMeta.modifiedOn).toISOString(),
-          syncProgress: null
+          syncProgress: 100,
         };
         set(noteId, note, storageContext?.noteMetaStoreRef.current);
         set(noteId, new GeoJSON().writeFeatures(noteFeatures), storageContext?.noteStoreRef.current);
