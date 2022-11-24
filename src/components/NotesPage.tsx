@@ -4,7 +4,7 @@ import {StorageContext} from "./StorageContext";
 import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
 import log from "../core/Logger";
-import {syncLocalNotes} from "../core/controller/GoogleDriveController";
+import {syncLocalNotes, syncRemoteNotes} from "../core/controller/GoogleDriveController";
 import {GoogleDrive} from "../hooks/useGoogleDrive";
 
 export default function NotesPage(props: {
@@ -41,8 +41,11 @@ export default function NotesPage(props: {
   useEffect(() => {
     if (notes.length > 0 && isSignedIn && storageContext) {
       syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress);
+      syncRemoteNotes(googleDrive, notes, storageContext, (note: Note) => {
+        setNotes([...notes, note]);
+      });
     }
-  }, [isSignedIn, notes.length]);
+  }, [isSignedIn]);
 
   const createNote = () => {
 

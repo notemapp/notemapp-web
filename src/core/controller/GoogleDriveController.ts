@@ -1,7 +1,8 @@
 import {Note} from "../Note";
 import {GoogleDrive} from "../../hooks/useGoogleDrive";
 import {StorageContextInterface} from "../../components/StorageContext";
-import {get, update} from "idb-keyval";
+import {get, keys, set, update} from "idb-keyval";
+import {GeoJSON} from "ol/format";
 
 async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContext: StorageContextInterface,
                              onSyncProgress: (noteId: string, progress: number) => void) {
@@ -45,6 +46,57 @@ async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContex
 
 }
 
+/**
+ * Create local notes that exist only on drive
+ */
+async function syncRemoteNotes(
+  googleDrive: GoogleDrive,
+  notes: Note[],
+  storageContext: StorageContextInterface,
+  onAddNote: (note: Note) => void,
+) {
+
+  try {
+
+    const files = await googleDrive.getFilesInAppDataFolder();
+    const localNotesIds = await keys(storageContext.noteMetaStoreRef.current);
+    const remoteNotes = files
+      .filter((file) => file.name.endsWith(".json"))
+      .filter((file) => !localNotesIds.includes(file.name.replace(".json", "")));
+
+    console.log("[SYNC] Found remote notes not on local:", remoteNotes);
+
+    for (const remoteNote of remoteNotes) {
+      const noteId = remoteNote.name.replace(".json", "");
+      const noteContent = await googleDrive.getFileContentById(remoteNote.id);
+      const noteMeta = await googleDrive.getFileMetaById(remoteNote.id);
+      try {
+        const noteJson = JSON.parse(noteContent);
+        const noteFeatures = new GeoJSON().readFeatures(noteJson);
+        console.log("[SYNC-remote] Creating new local note meta with features", noteId, noteFeatures);
+        // TODO: propagate also note title and previous view
+        const note: Note = {
+          id: noteId,
+          title: "Synced note",
+          createdOn: new Date(noteMeta.createdOn).toISOString(),
+          modifiedOn: new Date(noteMeta.modifiedOn).toISOString(),
+          syncProgress: null
+        };
+        set(noteId, note, storageContext?.noteMetaStoreRef.current);
+        set(noteId, new GeoJSON().writeFeatures(noteFeatures), storageContext?.noteStoreRef.current);
+        onAddNote(note);
+      } catch (error) {
+        console.log("[SYNC-remote] Ignoring note with invalid content:", noteId);
+        continue;
+      }
+    }
+
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
 async function syncLocalNotes(
   googleDrive: GoogleDrive,
   notes: Note[],
@@ -58,4 +110,4 @@ async function syncLocalNotes(
 
 }
 
-export {syncLocalNotes, syncLocalNote};
+export {syncLocalNotes, syncLocalNote, syncRemoteNotes};

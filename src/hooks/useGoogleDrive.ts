@@ -26,9 +26,31 @@ export interface GoogleDrive {
   deleteFileByName: (fileName: string) => Promise<void>;
   createFile: (fileName: string, content: string) => Promise<GoogleDriveFile>;
   updateFileById: (fileId: string, content: string) => Promise<GoogleDriveFile>;
+  getFilesInAppDataFolder: () => Promise<GoogleDriveFile[]>;
 }
 
 const useGoogleDrive = (getToken: () => Promise<string>) => {
+
+  async function getFilesInAppDataFolder(): Promise<GoogleDriveFile[]> {
+
+    try {
+
+      const token = await getToken();
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder`, {
+        method: "GET",
+        headers: new Headers({Authorization: `Bearer ${token}`}),
+      });
+      const json = await response.json();
+      const files = json.files as GoogleDriveFile[];
+      console.log("[INFO] Google Drive files in appdata folder:", files);
+      return files.filter((file) => file.mimeType === "application/json");
+
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+
+  }
 
   async function getFilesByName(fileName: string): Promise<GoogleDriveFile[]> {
 
@@ -208,7 +230,8 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
     deleteFileById,
     deleteFileByName,
     createFile,
-    updateFileById
+    updateFileById,
+    getFilesInAppDataFolder
   } as GoogleDrive;
 
 }
