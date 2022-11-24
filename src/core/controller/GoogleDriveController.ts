@@ -21,6 +21,7 @@ async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContex
         console.log("[SYNC] Remote note is more recent, downloading", note.id);
         const remoteNote = await googleDrive.getFileContentById(file.id);
         await update(note.id, (oldValue) => JSON.parse(remoteNote), storageContext.noteStoreRef.current);
+        await update(note.id, (oldValue) => { return {...oldValue, modifiedOn: new Date(remoteModifiedOn).toISOString()}}, storageContext.noteMetaStoreRef.current);
         console.log("[SYNC] Note downloaded", note.id);
       } else {
         console.log("[SYNC] Local note is more recent, uploading", note.id);
