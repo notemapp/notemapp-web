@@ -11,42 +11,32 @@ interface GoogleDriveError {
 
 const useGoogleDrive = (getToken: () => Promise<string>) => {
 
-  function getFilesByName(
-    fileName: string,
-    onSuccess: (files: GoogleDriveFile[]) => void,
-    onError: (error: GoogleDriveError) => void
-  ) {
+  async function getFilesByName(fileName: string): Promise<GoogleDriveFile[]> {
 
-    getToken()
-      .then((token) => {
-        return fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'&spaces=appDataFolder`, {
-          method: "GET",
-          headers: new Headers({ Authorization: `Bearer ${token}` }),
-        });
-      })
-      .then((response: Response) => response.json())
-      .then((response: any) => onSuccess(response?.files || []))
-      .catch(onError);
+    try {
+
+      const token = await getToken();
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'&spaces=appDataFolder`, {
+        method: "GET",
+        headers: new Headers({Authorization: `Bearer ${token}`}),
+      });
+      const json = await response.json();
+      return json.files as GoogleDriveFile[];
+
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+
 
   }
 
-  function getFileByName(
-    fileName: string,
-    onSuccess: (file: GoogleDriveFile) => void,
-    onError: (error: GoogleDriveError) => void
-  ) {
+  async function getFileByName(fileName: string): Promise<GoogleDriveFile|null> {
 
-    getFilesByName(
-      fileName,
-      (files) => {
-        if (files.length > 0) {
-          onSuccess(files[0]);
-        } else {
-          onError({ message: `File '${fileName}' not found` });
-        }
-      },
-      onError
-    );
+    return await getFilesByName(fileName)
+      .then((files) => {
+        return files.length > 0 ? files[0] : null;
+      });
 
   }
 
