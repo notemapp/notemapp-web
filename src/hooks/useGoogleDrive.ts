@@ -17,6 +17,16 @@ interface GoogleDriveFileMeta {
   modifiedOn: Date;
 }
 
+export interface GoogleDrive {
+  getFilesByName: (fileName: string) => Promise<GoogleDriveFile[]>;
+  getFileByName: (fileName: string) => Promise<GoogleDriveFile|null>;
+  getFileContentById: (fileId: string) => Promise<string>;
+  getFileMetaById: (fileId: string) => Promise<GoogleDriveFileMeta>;
+  deleteFileById: (fileId: string) => Promise<void>;
+  createFile: (fileName: string, content: string) => Promise<GoogleDriveFile>;
+  updateFileById: (fileId: string, content: string) => Promise<GoogleDriveFile>;
+}
+
 const useGoogleDrive = (getToken: () => Promise<string>) => {
 
   async function getFilesByName(fileName: string): Promise<GoogleDriveFile[]> {
@@ -150,8 +160,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const token = await getToken();
       const metadata = {
         name: fileName,
-        mimeType: mimeType,
-        parents: ['appDataFolder']
+        mimeType: mimeType
       };
       const form = new FormData();
       form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
@@ -184,7 +193,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
     deleteFileById,
     createFile,
     updateFileById
-  };
+  } as GoogleDrive;
 
 }
 

@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import log from "../core/Logger";
-import useGoogleDrive from "./useGoogleDrive";
+import useGoogleDrive, {GoogleDrive} from "./useGoogleDrive";
 import TokenClient = google.accounts.oauth2.TokenClient;
 
 const useGoogle = () => {
@@ -14,15 +14,7 @@ const useGoogle = () => {
   const [tokenExpiration, setTokenExpiration] = useState<number|null>(null);
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
 
-  const {
-    getFilesByName,
-    getFileByName,
-    getFileContentById,
-    getFileMetaById,
-    deleteFileById,
-    createFile,
-    updateFileById
-  } = useGoogleDrive(getToken);
+  const googleDrive: GoogleDrive = useGoogleDrive(getToken);
 
   function setLogout() {
     setIsSignedIn(false);
@@ -134,13 +126,7 @@ const useGoogle = () => {
     requestAuth,
     isSignedIn,
     signOut,
-    getFilesByName,
-    getFileByName,
-    getFileContentById,
-    getFileMetaById,
-    deleteFileById,
-    createFile,
-    updateFileById
+    googleDrive
   };
 
 };

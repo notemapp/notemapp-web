@@ -4,12 +4,13 @@ import {StorageContext} from "./StorageContext";
 import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
 import log from "../core/Logger";
+import {syncLocalNotes} from "../core/controller/GoogleDriveController";
 
 export default function NotesPage(props: {
   google: any
 }) {
 
-  const {requestAuth, isSignedIn, signOut} = props.google;
+  const {requestAuth, isSignedIn, signOut, googleDrive} = props.google;
 
   const storageContext = useContext(StorageContext);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -22,6 +23,20 @@ export default function NotesPage(props: {
     });
   }, []);
 
+  function onSyncProgress(noteId: string, progress: number) {
+    const note = notes.find((note) => note.id === noteId);
+    if (note) {
+      note.syncProgress = progress;
+      setNotes([...notes]);
+    }
+  }
+
+  useEffect(() => {
+    if (notes.length > 0 && isSignedIn && storageContext) {
+      syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress);
+    }
+  }, [isSignedIn]);
+
   const createNote = () => {
 
     const id = (Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15))
@@ -31,6 +46,7 @@ export default function NotesPage(props: {
       title: titleRef.current?.value || "Untitled note",
       createdOn: new Date().toISOString(),
       modifiedOn: new Date().toISOString(),
+      syncProgress: null
     }
     set(id, note, storageContext?.noteMetaStoreRef.current).then(() => navigate(`/map/${id}`));
 
@@ -41,6 +57,7 @@ export default function NotesPage(props: {
       del(note.id, storageContext?.noteMetaStoreRef.current).then(() => {
         log("[DELETE] Note meta:", note.id);
         setNotes(notes.filter((n) => n.id !== note.id));
+        // TODO: delete note from GDrive if syncing
       });
       del(note.id, storageContext?.noteStoreRef.current);
       del(note.id, storageContext?.notePrefsStoreRef.current);
@@ -66,6 +83,7 @@ export default function NotesPage(props: {
           <li key={note.id} >
             <div className="w-full px-4 py-2 my-1 border border-1 border-black">
               <span className="text-lg font-semibold">{note.title}</span>
+              <span className="text-sm text-gray-500 ml-2">SYNC: {note.syncProgress !== -1 ? note.syncProgress + '%' : 'FAIL'}</span>
               <div className="text-sm text-gray-500"> created on {note.createdOn}</div>
               <div className="text-sm text-gray-500"> modified on {note.modifiedOn} </div>
               <div className="flex space-x-4">

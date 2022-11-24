@@ -3,4 +3,5 @@ export interface Note {
   title: string;
   createdOn: string;
   modifiedOn: string;
+  syncProgress: number|null;
 }
