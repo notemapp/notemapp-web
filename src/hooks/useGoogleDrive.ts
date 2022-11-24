@@ -23,6 +23,7 @@ export interface GoogleDrive {
   getFileContentById: (fileId: string) => Promise<string>;
   getFileMetaById: (fileId: string) => Promise<GoogleDriveFileMeta>;
   deleteFileById: (fileId: string) => Promise<void>;
+  deleteFileByName: (fileName: string) => Promise<void>;
   createFile: (fileName: string, content: string) => Promise<GoogleDriveFile>;
   updateFileById: (fileId: string, content: string) => Promise<GoogleDriveFile>;
 }
@@ -111,6 +112,20 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
 
   }
 
+  async function deleteFileByName(fileName: string): Promise<void> {
+
+    try {
+      const file = await getFileByName(fileName);
+      if (file) {
+        await deleteFileById(file.id);
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+
+  }
+
   async function createFile(
     fileName: string,
     content: string,
@@ -191,6 +206,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
     getFileContentById,
     getFileMetaById,
     deleteFileById,
+    deleteFileByName,
     createFile,
     updateFileById
   } as GoogleDrive;

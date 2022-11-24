@@ -57,4 +57,4 @@ async function syncLocalNotes(
 
 }
 
-export {syncLocalNotes};
+export {syncLocalNotes, syncLocalNote};

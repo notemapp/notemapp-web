@@ -5,12 +5,19 @@ import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
 import log from "../core/Logger";
 import {syncLocalNotes} from "../core/controller/GoogleDriveController";
+import {GoogleDrive} from "../hooks/useGoogleDrive";
 
 export default function NotesPage(props: {
-  google: any
+  google: {
+    requestAuth: () => void,
+    isSignedIn: boolean,
+    signOut: () => void,
+    googleDrive: GoogleDrive
+  }
 }) {
 
   const {requestAuth, isSignedIn, signOut, googleDrive} = props.google;
+  const {deleteFileByName} = googleDrive;
 
   const storageContext = useContext(StorageContext);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -35,7 +42,7 @@ export default function NotesPage(props: {
     if (notes.length > 0 && isSignedIn && storageContext) {
       syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress);
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, notes.length]);
 
   const createNote = () => {
 
@@ -54,13 +61,17 @@ export default function NotesPage(props: {
 
   const onDeleteNote = (note: Note) => {
     if (confirm('Are you sure you want to delete this note?')) {
-      del(note.id, storageContext?.noteMetaStoreRef.current).then(() => {
+      del(note.id, storageContext?.noteMetaStoreRef.current).then(async () => {
         log("[DELETE] Note meta:", note.id);
         setNotes(notes.filter((n) => n.id !== note.id));
-        // TODO: delete note from GDrive if syncing
+        log("[DELETE] Deleting remote:", note.id);
+        await deleteFileByName(note.id);
+        log("[DELETE] Deleting local note content:", note.id);
+        await del(note.id, storageContext?.noteStoreRef.current);
+        log("[DELETE] Deleting local note prefs:", note.id);
+        await del(note.id, storageContext?.notePrefsStoreRef.current);
+        log("[DELETE] Deleted local and remote:", note.id);
       });
-      del(note.id, storageContext?.noteStoreRef.current);
-      del(note.id, storageContext?.notePrefsStoreRef.current);
     }
   }
 
