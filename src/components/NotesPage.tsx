@@ -5,7 +5,11 @@ import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
 import log from "../core/Logger";
 
-export default function NotesPage() {
+export default function NotesPage(props: {
+  google: any
+}) {
+
+  const {requestAuth, isSignedIn, signOut} = props.google;
 
   const storageContext = useContext(StorageContext);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -88,6 +92,27 @@ export default function NotesPage() {
         >
           Create
         </button>
+      </div>
+      <h1 className="text-2xl py-2 font-bold">Sign In</h1>
+      <div>
+        {
+          !isSignedIn &&
+          <button
+            onClick={requestAuth}
+            className="my-1 px-2 py-1 border border-1 border-black hover:bg-gray-300"
+          >
+            Request Google Auth
+          </button>
+        }
+        {
+          isSignedIn &&
+          <button
+            onClick={signOut}
+            className="my-1 px-2 py-1 border border-1 border-black hover:bg-gray-300"
+          >
+            SignOut
+          </button>
+        }
       </div>
     </div>
   );

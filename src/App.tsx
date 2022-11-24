@@ -4,19 +4,22 @@ import log from "./core/Logger";
 import MapPage from "./components/MapPage";
 import NotesPage from "./components/NotesPage";
 import {StorageContextProvider} from "./components/StorageContext";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <NotesPage />
-  },
-  {
-    path: "/map/:noteId",
-    element: <MapPage />
-  }
-]);
+import useGoogle from "./hooks/useGoogle";
 
 function App() {
+
+  const google = useGoogle();
+
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <NotesPage google={google} />
+    },
+    {
+      path: "/map/:noteId",
+      element: <MapPage />
+    }
+  ]);
 
   return (
     <StorageContextProvider>
