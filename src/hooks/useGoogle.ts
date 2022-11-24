@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import log from "../core/Logger";
+import useGoogleDrive from "./useGoogleDrive";
 import TokenClient = google.accounts.oauth2.TokenClient;
 
 const useGoogle = () => {
@@ -13,10 +14,44 @@ const useGoogle = () => {
   const [tokenExpiration, setTokenExpiration] = useState<number|null>(null);
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
 
+  const {
+    getFilesByName,
+    getFileByName,
+    getFileContentById,
+    getFileMetaById,
+    deleteFileById,
+    createFile,
+    updateFileById
+  } = useGoogleDrive(getToken);
+
   function setLogout() {
     setIsSignedIn(false);
     setToken(null);
     setTokenExpiration(null);
+  }
+
+  async function getToken(): Promise<string> {
+
+    try {
+      if (isSignedIn && token) {
+        return Promise.resolve(token);
+      } else {
+        // Workaround :(
+        client?.requestAccessToken();
+        return new Promise<string>((resolve) => {
+          const interval = setInterval(() => {
+            if (token) {
+              clearInterval(interval);
+              resolve(token);
+            }
+          }, 100);
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+
   }
 
   function requestAuth() {
@@ -95,7 +130,18 @@ const useGoogle = () => {
     setIsSignedIn(token !== null && tokenExpiration !== null && tokenExpiration > new Date().getTime());
   })
 
-  return {requestAuth, isSignedIn, signOut};
+  return {
+    requestAuth,
+    isSignedIn,
+    signOut,
+    getFilesByName,
+    getFileByName,
+    getFileContentById,
+    getFileMetaById,
+    deleteFileById,
+    createFile,
+    updateFileById
+  };
 
 };
 
