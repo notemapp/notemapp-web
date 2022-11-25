@@ -4,7 +4,7 @@ import {Overlay, View} from "ol";
 import {MutableRefObject, RefObject} from "react";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import {get, set, update} from "idb-keyval";
+import {get, update} from "idb-keyval";
 import log from "../Logger";
 import {StorageContextInterface} from "../../components/StorageContext";
 import LayerGroup from "ol/layer/Group";
