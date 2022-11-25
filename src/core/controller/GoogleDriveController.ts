@@ -45,7 +45,7 @@ async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContex
     } else {
       console.log("[SYNC] Note does not exist on GDrive, uploading", note.id);
       const noteContent = await get(note.id, storageContext.noteStoreRef.current);
-      await googleDrive.createFile(note.id + ".json", JSON.stringify(noteContent));
+      await googleDrive.createFile(note.id + ".json", JSON.stringify(noteContent), note.title);
       console.log("[SYNC] Note uploaded", note.id);
     }
 
@@ -89,7 +89,7 @@ async function syncRemoteNotes(
         // TODO: propagate also note title and previous view
         const note: Note = {
           id: noteId,
-          title: "Synced note",
+          title: noteMeta.appProperties?.title || "Untitled note",
           createdOn: new Date(noteMeta.createdOn).toISOString(),
           modifiedOn: new Date(noteMeta.modifiedOn).toISOString(),
           syncProgress: 100,

@@ -4,7 +4,7 @@ import {StorageContext} from "./StorageContext";
 import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
 import log from "../core/Logger";
-import {syncLocalNotes, syncRemoteNotes} from "../core/controller/GoogleDriveController";
+import {syncLocalNote, syncLocalNotes, syncRemoteNotes} from "../core/controller/GoogleDriveController";
 import {GoogleDrive} from "../hooks/useGoogleDrive";
 
 export default function NotesPage(props: {
@@ -30,7 +30,7 @@ export default function NotesPage(props: {
     entries(storageContext?.noteMetaStoreRef.current).then((entries) => {
       setNotes(entries.map((entry) => entry[1]));
     });
-  }, [isSyncing]);
+  }, []);
 
   function onSyncProgress(noteId: string, progress: number) {
     const note = notes.find((note) => note.id === noteId);
@@ -66,7 +66,12 @@ export default function NotesPage(props: {
       modifiedOn: new Date().toISOString(),
       syncProgress: null
     }
-    set(id, note, storageContext?.noteMetaStoreRef.current).then(() => navigate(`/map/${id}`));
+    set(id, note, storageContext?.noteMetaStoreRef.current).then(async () => {
+      if (!storageContext) return;
+      setNotes([...notes, note]);
+      await syncLocalNote(googleDrive, note, storageContext, onSyncProgress);
+      navigate(`/map/${id}`);
+    });
 
   }
 

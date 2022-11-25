@@ -3,6 +3,7 @@ interface GoogleDriveFile {
   name: string;
   mimeType: string;
   kind: string;
+  appProperties: any;
 }
 
 interface GoogleDriveError {
@@ -15,6 +16,7 @@ interface GoogleDriveFileMeta {
   mimeType: string;
   createdOn: Date;
   modifiedOn: Date;
+  appProperties: any;
 }
 
 export interface GoogleDrive {
@@ -24,7 +26,7 @@ export interface GoogleDrive {
   getFileMetaById: (fileId: string) => Promise<GoogleDriveFileMeta>;
   deleteFileById: (fileId: string) => Promise<void>;
   deleteFileByName: (fileName: string) => Promise<void>;
-  createFile: (fileName: string, content: string) => Promise<GoogleDriveFile>;
+  createFile: (fileName: string, content: string, title: string) => Promise<GoogleDriveFile>;
   updateFileById: (fileId: string, fileName: string, content: string, mimeType: string) => Promise<GoogleDriveFile>;
   getFilesInAppDataFolder: () => Promise<GoogleDriveFile[]>;
 }
@@ -36,7 +38,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
     try {
 
       const token = await getToken();
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder`, {
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files`, {
         method: "GET",
         headers: new Headers({Authorization: `Bearer ${token}`}),
       });
@@ -101,7 +103,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
 
     try {
       const token = await getToken();
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,createdTime,modifiedTime`, {
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,createdTime,modifiedTime,appProperties`, {
         method: "GET",
         headers: new Headers({ Authorization: `Bearer ${token}` }),
       });
@@ -112,6 +114,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
         mimeType: json.mimeType,
         createdOn: new Date(json.createdTime),
         modifiedOn: new Date(json.modifiedTime),
+        appProperties: json.appProperties,
       } as GoogleDriveFileMeta;
     } catch (error) {
       console.log(error);
@@ -154,7 +157,8 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
   async function createFile(
     fileName: string,
     content: string,
-    mimeType: string = "application/json"
+    title: string = "Untitled note",
+    mimeType: string = "application/json",
   ): Promise<GoogleDriveFile> {
 
     try {
@@ -163,7 +167,10 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const metadata = {
         name: fileName,
         mimeType: mimeType,
-        parents: ['appDataFolder']
+        parents: ['appDataFolder'],
+        appProperties: {
+          title: title
+        }
       };
       const form = new FormData();
       form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
@@ -225,6 +232,42 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
 
   }
 
+  async function updateFileMetaById(
+    fileId: string,
+    title: string,
+  ): Promise<GoogleDriveFile> {
+
+    try {
+
+      const token = await getToken();
+      const metadata = {
+        appProperties: {
+          title: title
+        }
+      };
+      const form = new FormData();
+      form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: "PATCH",
+        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        body: form,
+      });
+      const json = await response.json();
+      return {
+        id: json.id,
+        name: json.name,
+        mimeType: json.mimeType,
+        kind: json.kind,
+        appProperties: json.appProperties
+      } as GoogleDriveFile;
+
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+
+  }
+
   return {
     getFilesByName,
     getFileByName,
@@ -234,7 +277,8 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
     deleteFileByName,
     createFile,
     updateFileById,
-    getFilesInAppDataFolder
+    getFilesInAppDataFolder,
+    updateFileMetaById
   } as GoogleDrive;
 
 }
