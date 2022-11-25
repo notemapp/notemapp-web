@@ -132,6 +132,8 @@ async function syncLocalNotes(
     await syncLocalNote(googleDrive, note, storageContext, onSyncProgress);
   }
 
+  return Promise.resolve();
+
 }
 
 export {syncLocalNotes, syncLocalNote, syncRemoteNotes};
