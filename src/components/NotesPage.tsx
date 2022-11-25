@@ -41,7 +41,7 @@ export default function NotesPage(props: {
   }
 
   useEffect(() => {
-    if (notes.length > 0 && isSignedIn && storageContext) {
+    if (isSignedIn && storageContext) {
       setIsSyncing(true);
       syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress).then(() => {
         console.log("Synced local notes");
