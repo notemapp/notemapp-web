@@ -2,7 +2,7 @@ import VectorLayer from "ol/layer/Vector";
 import {MutableRefObject} from "react";
 import VectorSource from "ol/source/Vector";
 import TileLayer from "ol/layer/Tile";
-import {OSM, XYZ} from "ol/source";
+import {BingMaps, Stamen} from "ol/source";
 import LayerGroup from "ol/layer/Group";
 import {getStyleByFeature} from "./FeatureStyleController";
 import {get} from "idb-keyval";
@@ -35,19 +35,27 @@ function initTileLayerGroup(
       layers: [
         // TODO: load tiles from own proxy
         new TileLayer({
-          source: new XYZ({url: 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', crossOrigin: 'anonymous'}),
-          preload: 4,
-          visible: true
+          visible: true,
+          preload: Infinity,
+          source: new Stamen({
+            layer: 'toner',
+          }),
         }),
         new TileLayer({
-          source: new OSM({crossOrigin: 'anonymous'}),
-          preload: 4,
-          visible: false
+          visible: false,
+          preload: Infinity,
+          source: new BingMaps({
+            key: import.meta.env.VITE_BING_API_KEY,
+            imagerySet: 'RoadOnDemand'
+          }),
         }),
         new TileLayer({
-          source: new XYZ({url: `https://tile-proxy-bing.alessiovierti.workers.dev/Aerial/{z}/{x}/{y}.jpg?key=none`, crossOrigin: 'anonymous'}),
-          preload: 4,
-          visible: false
+          visible: false,
+          preload: Infinity,
+          source: new BingMaps({
+            key: import.meta.env.VITE_BING_API_KEY,
+            imagerySet: 'AerialWithLabelsOnDemand'
+          }),
         })
       ]
     })

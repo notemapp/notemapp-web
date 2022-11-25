@@ -1,10 +1,14 @@
 const CACHE_NAME = 'v1';
 
-const ALWAYS_CACHE_HOSTS = [
-  "tile.openstreetmap.org",
-  "a.tile.openstreetmap.org",
-  "stamen-tiles.a.ssl.fastly.net",
-  "tile-proxy-bing.alessiovierti.workers.dev"
+const ALWAYS_CACHED_HOSTS = [
+  "stamen-tiles-a.a.ssl.fastly.net",
+  "stamen-tiles-b.a.ssl.fastly.net",
+  "stamen-tiles-c.a.ssl.fastly.net",
+  "stamen-tiles-d.a.ssl.fastly.net",
+  "t0.ssl.ak.dynamic.tiles.virtualearth.net",
+  "t1.ssl.ak.dynamic.tiles.virtualearth.net",
+  "t2.ssl.ak.dynamic.tiles.virtualearth.net",
+  "t3.ssl.ak.dynamic.tiles.virtualearth.net"
 ];
 
 const addResourcesToCache = async (resources) => {
@@ -22,7 +26,7 @@ const cacheFirstIfOffline = async ({ request, preloadResponsePromise, fallbackUr
   // First try to get the resource from the cache
   const {hostname} = new URL(request.url);
   const responseFromCache = await caches.match(request);
-  if (responseFromCache && (ALWAYS_CACHE_HOSTS.includes(hostname) || !navigator.onLine)) {
+  if (responseFromCache && (ALWAYS_CACHED_HOSTS.includes(hostname) || !navigator.onLine)) {
     return responseFromCache;
   }
 
