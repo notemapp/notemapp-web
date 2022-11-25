@@ -24,11 +24,13 @@ export default function NotesPage(props: {
   const titleRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
   useEffect(() => {
     entries(storageContext?.noteMetaStoreRef.current).then((entries) => {
       setNotes(entries.map((entry) => entry[1]));
     });
-  }, []);
+  }, [isSyncing]);
 
   function onSyncProgress(noteId: string, progress: number) {
     const note = notes.find((note) => note.id === noteId);
@@ -40,6 +42,7 @@ export default function NotesPage(props: {
 
   useEffect(() => {
     if (notes.length > 0 && isSignedIn && storageContext) {
+      setIsSyncing(true);
       syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress).then(() => {
         console.log("Synced local notes");
         return syncRemoteNotes(googleDrive, notes, storageContext, (note: Note) => {
@@ -47,6 +50,7 @@ export default function NotesPage(props: {
         })
       }).then(() => {
         console.log("Synced remote notes");
+        setIsSyncing(false);
       });
     }
   }, [isSignedIn]);
