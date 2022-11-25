@@ -19,11 +19,23 @@ async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContex
       const remoteModifiedOn = fileMeta.modifiedOn.getTime();
       const localModifiedOn = new Date(note.modifiedOn).getTime();
       if (remoteModifiedOn > localModifiedOn) {
+
         console.log("[SYNC] Remote note is more recent, downloading", note.id);
         const remoteNote = await googleDrive.getFileContentById(file.id);
-        await update(note.id, (oldValue) => JSON.parse(remoteNote), storageContext.noteStoreRef.current);
-        await update(note.id, (oldValue) => { return {...oldValue, modifiedOn: new Date(remoteModifiedOn).toISOString()}}, storageContext.noteMetaStoreRef.current);
-        console.log("[SYNC] Note downloaded", note.id);
+
+        if (remoteNote !== '[deleted]') {
+          await update(note.id, (oldValue) => JSON.parse(remoteNote), storageContext.noteStoreRef.current);
+          await update(note.id, (oldValue) => {
+            return {...oldValue, modifiedOn: new Date(remoteModifiedOn).toISOString()}
+          }, storageContext.noteMetaStoreRef.current);
+          console.log("[SYNC] Note downloaded", note.id);
+        } else {
+          console.log("[SYNC] Note deleted on remote, deleting local", note.id);
+          await del(note.id, storageContext.noteStoreRef.current);
+          await del(note.id, storageContext.noteMetaStoreRef.current);
+          await del(note.id, storageContext.notePrefsStoreRef.current);
+        }
+
       } else {
         console.log("[SYNC] Local note is more recent, uploading", note.id);
         const noteContent = await get(note.id, storageContext.noteStoreRef.current);

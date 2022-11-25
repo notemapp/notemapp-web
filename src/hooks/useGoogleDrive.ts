@@ -141,7 +141,8 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
     try {
       const file = await getFileByName(fileName);
       if (file) {
-        await deleteFileById(file.id);
+        //await deleteFileById(file.id);
+        await updateFileById(file.id, fileName, "[deleted]", "application/json");
       }
     } catch (error) {
       console.log(error);
