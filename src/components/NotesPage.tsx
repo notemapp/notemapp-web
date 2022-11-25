@@ -19,6 +19,13 @@ export default function NotesPage(props: {
   const {requestAuth, isSignedIn, signOut, googleDrive} = props.google;
   const {deleteFileByName} = googleDrive;
 
+  const onSignIn = () => {
+
+    localStorage.setItem('hasPreviouslySignedIn', 'yep');
+    requestAuth();
+
+  }
+
   const storageContext = useContext(StorageContext);
   const [notes, setNotes] = useState<Note[]>([]);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -143,7 +150,7 @@ export default function NotesPage(props: {
         {
           !isSignedIn &&
           <button
-            onClick={requestAuth}
+            onClick={onSignIn}
             className="my-1 px-2 py-1 border border-1 border-black hover:bg-gray-300"
           >
             Request Google Auth

@@ -77,8 +77,6 @@ const useGoogle = () => {
       log("[ERROR] Google client not ready");
     }
 
-    localStorage.setItem('hasPreviouslySignedIn', 'yep');
-
   }
 
   function signOut() {
