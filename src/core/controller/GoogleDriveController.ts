@@ -1,7 +1,7 @@
 import {Note} from "../Note";
 import {GoogleDrive} from "../../hooks/useGoogleDrive";
 import {StorageContextInterface} from "../../components/StorageContext";
-import {get, keys, set, update} from "idb-keyval";
+import {del, get, keys, set, update} from "idb-keyval";
 import {GeoJSON} from "ol/format";
 
 async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContext: StorageContextInterface,
@@ -59,7 +59,7 @@ async function syncRemoteNotes(
   try {
 
     const files = await googleDrive.getFilesInAppDataFolder();
-    const localNotesIds = await keys(storageContext.noteMetaStoreRef.current);
+    let localNotesIds = await keys<string>(storageContext.noteMetaStoreRef.current);
     const remoteNotes = files
       .filter((file) => file.name.endsWith(".json"))
       .filter((file) => !localNotesIds.includes(file.name.replace(".json", "")));
@@ -89,6 +89,18 @@ async function syncRemoteNotes(
         console.log("[SYNC-remote] Ignoring note with invalid content:", noteId);
         continue;
       }
+    }
+
+    // remove local notes that do not exist on drive
+
+    const remoteNotesIds = files.filter((file) => file.name.endsWith(".json")).map((file) => file.name.replace(".json", ""));
+    const localNotesToDelete = localNotesIds.filter((noteId) => !remoteNotesIds.includes(noteId));
+    console.log("[SYNC] Local notes to delete:", localNotesToDelete);
+    for (const noteId of localNotesToDelete) {
+      console.log("[SYNC] Deleting local note", noteId);
+      await del(noteId, storageContext.noteStoreRef.current);
+      await del(noteId, storageContext.noteMetaStoreRef.current);
+      await del(noteId, storageContext.notePrefsStoreRef.current);
     }
 
   } catch (error) {

@@ -72,7 +72,7 @@ export default function NotesPage(props: {
         log("[DELETE] Note meta:", note.id);
         setNotes(notes.filter((n) => n.id !== note.id));
         log("[DELETE] Deleting remote:", note.id);
-        await deleteFileByName(note.id);
+        await deleteFileByName(note.id + '.json');
         log("[DELETE] Deleting local note content:", note.id);
         await del(note.id, storageContext?.noteStoreRef.current);
         log("[DELETE] Deleting local note prefs:", note.id);

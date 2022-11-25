@@ -123,6 +123,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
   async function deleteFileById(fileId: string): Promise<void> {
 
     try {
+      console.log("[DELETE] Requesting delete file with id:", fileId);
       const token = await getToken();
       await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: "DELETE",
