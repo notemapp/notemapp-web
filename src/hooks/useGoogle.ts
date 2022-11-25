@@ -77,6 +77,8 @@ const useGoogle = () => {
       log("[ERROR] Google client not ready");
     }
 
+    localStorage.setItem('hasPreviouslySignedIn', 'yep');
+
   }
 
   function signOut() {
@@ -142,7 +144,8 @@ const useGoogle = () => {
 
   useEffect(() => {
 
-    if (client && token === null) {
+    const hasPreviouslySignedIn = localStorage.getItem('hasPreviouslySignedIn') !== null;
+    if (client && token === null && hasPreviouslySignedIn) {
       log("[INFO] Try silent refresh");
       requestAuth();
     }
