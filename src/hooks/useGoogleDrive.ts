@@ -43,6 +43,8 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
         headers: new Headers({Authorization: `Bearer ${token}`}),
       });
       const json = await response.json();
+
+      console.log(json);
       const files = json.files as GoogleDriveFile[];
 
       console.log("[INFO] Google Drive files in appdata folder:", files);

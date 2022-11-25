@@ -20,6 +20,8 @@ const useGoogle = () => {
     setIsSignedIn(false);
     setToken(null);
     setTokenExpiration(null);
+    localStorage.removeItem('googleToken');
+    localStorage.removeItem('googleTokenExpiration');
   }
 
   async function getToken(): Promise<string> {
@@ -29,7 +31,7 @@ const useGoogle = () => {
         return Promise.resolve(token);
       } else {
         // Workaround :(
-        client?.requestAccessToken();
+        requestAuth();
         return new Promise<string>((resolve) => {
           const interval = setInterval(() => {
             if (token) {
