@@ -47,11 +47,34 @@ const useGoogle = () => {
   }
 
   function requestAuth() {
-    if (client) {
+
+    // retrieve token from local storage
+    const token = localStorage.getItem('googleTokenValue');
+    const tokenExpiration = localStorage.getItem('googleTokenExpiration');
+
+    let usingLocalStorage = false;
+    if (token && tokenExpiration) {
+      if (Date.now() < Number(tokenExpiration)) {
+        console.log("[TOKEN] Token is still valid, using it");
+        setToken(token);
+        setTokenExpiration(Number(tokenExpiration));
+        usingLocalStorage = true;
+      } else {
+        console.log("[INFO] Local storage token expired");
+        localStorage.removeItem('googleTokenValue');
+        localStorage.removeItem('googleTokenExpiration');
+      }
+    } else {
+      console.log("[INFO] Local storage token not found");
+    }
+
+    if (client && !usingLocalStorage) {
+      console.log("[INFO] Requesting auth", isSignedIn);
       client.requestAccessToken();
     } else {
       log("[ERROR] Google client not ready");
     }
+
   }
 
   function signOut() {
@@ -78,8 +101,14 @@ const useGoogle = () => {
           if (response && response.access_token) {
             if (google.accounts.oauth2.hasGrantedAllScopes(response, SCOPES[0], ...SCOPES.slice(1))) {
               setToken(response.access_token);
-              setTokenExpiration(new Date().getTime() + response.expires_in * 1000);
-              setIsSignedIn(true);
+              let expiration = new Date().getTime() + response.expires_in * 1000;
+              setTokenExpiration(expiration);
+
+              // save in local storage
+              console.log("Saving token in local storage");
+              localStorage.setItem('googleTokenValue', response.access_token);
+              localStorage.setItem('googleTokenExpiration', expiration.toString());
+
               log("[INFO] Google auth success");
             } else {
               log("[ERROR] Missing at least one scope auth");
@@ -113,14 +142,14 @@ const useGoogle = () => {
 
     if (client && token === null) {
       log("[INFO] Try silent refresh");
-      client.requestAccessToken();
+      requestAuth();
     }
 
   }, [client]);
 
   useEffect(() => {
     setIsSignedIn(token !== null && tokenExpiration !== null && tokenExpiration > new Date().getTime());
-  })
+  }, [token, tokenExpiration]);
 
   return {
     requestAuth,
