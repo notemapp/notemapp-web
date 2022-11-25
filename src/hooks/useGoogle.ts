@@ -20,7 +20,7 @@ const useGoogle = () => {
     setIsSignedIn(false);
     setToken(null);
     setTokenExpiration(null);
-    localStorage.removeItem('googleToken');
+    localStorage.removeItem('googleTokenValue');
     localStorage.removeItem('googleTokenExpiration');
   }
 
