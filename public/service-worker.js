@@ -11,40 +11,57 @@ const ALWAYS_CACHED_HOSTS = [
   "t3.ssl.ak.dynamic.tiles.virtualearth.net"
 ];
 
-const addResourcesToCache = async (resources) => {
+const PREFETCHED_URLS = [
+  '/assets/index.css',
+  '/assets/index.js',
+  '/assets/layer-1.png',
+  '/assets/layer-2.png',
+  '/assets/layer-3.png',
+  '/assets/logo512-w.png',
+  '/assets/logo512-w.svg',
+  '/assets/logo512-mw.png',
+  '/assets/logo512-mw.svg',
+  '/index.html',
+  '/manifest.json',
+  '/service-worker.js'
+];
+
+const prefetch = async (urls) => {
   const cache = await caches.open(CACHE_NAME);
-  await cache.addAll(resources);
+  await cache.addAll(urls);
 };
 
-const putInCache = async (request, response) => {
+const cacheResponse = async (request, response) => {
   const cache = await caches.open(CACHE_NAME);
   await cache.put(request, response);
 };
 
-const cacheFirstIfOffline = async ({ request, preloadResponsePromise, fallbackUrl }) => {
+const isOnline = () => {
+  return navigator.onLine;
+}
 
-  // First try to get the resource from the cache
+const fetchFromCacheIfOffline = async ({ request, preloadResponsePromise, fallbackUrl }) => {
+
+  // Fetch from cache if offline:
   const {hostname} = new URL(request.url);
   const responseFromCache = await caches.match(request);
-  if (responseFromCache && (ALWAYS_CACHED_HOSTS.includes(hostname) || !navigator.onLine)) {
+  if (responseFromCache && (ALWAYS_CACHED_HOSTS.includes(hostname) || !isOnline())) {
+    console.debug('Serving from cache', request.url);
     return responseFromCache;
   }
 
-  // Next try to use the preloaded response, if it's there
+  // Otherwise use preload response if available:
   const preloadResponse = await preloadResponsePromise;
   if (preloadResponse) {
-    console.info('Using preload response', preloadResponse);
-    putInCache(request, preloadResponse.clone());
+    console.debug('Using preload response', preloadResponse, 'for', request.url);
+    await cacheResponse(request, preloadResponse.clone());
     return preloadResponse;
   }
 
-  // Next try to get the resource from the network
+  // Otherwise fetch from network:
   try {
     const responseFromNetwork = await fetch(request);
-    // response may be used only once
-    // we need to save clone to put one copy in cache
-    // and serve second one
-    putInCache(request, responseFromNetwork.clone());
+    await cacheResponse(request, responseFromNetwork.clone());
     return responseFromNetwork;
   } catch (error) {
     if (fallbackUrl) {
@@ -53,19 +70,16 @@ const cacheFirstIfOffline = async ({ request, preloadResponsePromise, fallbackUr
         return fallbackResponse;
       }
     }
-    // when even the fallback response is not available,
-    // there is nothing we can do, but we must always
-    // return a Response object
-    return new Response('Network error happened', {
+    return new Response(JSON.stringify(error), {
       status: 408,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: {'Content-Type': 'application/json'}
     });
   }
+
 };
 
 const enableNavigationPreload = async () => {
   if (self.registration.navigationPreload) {
-    // Enable navigation preloads!
     await self.registration.navigationPreload.enable();
   }
 };
@@ -75,27 +89,15 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    addResourcesToCache([
-      '/',
-      '/index.html',
-      '/assets/index.css',
-      '/assets/index.js',
-      '/assets/layer-1.png',
-      '/assets/layer-3.png',
-      '/assets/layer-2.png',
-      '/logo.png',
-      'manifest.json'
-    ])
-  );
+  event.waitUntil(prefetch(PREFETCHED_URLS));
 });
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    cacheFirstIfOffline({
+    fetchFromCacheIfOffline({
       request: event.request,
       preloadResponsePromise: event.preloadResponse,
-      fallbackUrl: undefined,
+      fallbackUrl: undefined
     })
   );
 });
