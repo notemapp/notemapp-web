@@ -77,9 +77,9 @@ self.addEventListener('install', (event) => {
       '/index.html',
       '/assets/index.css',
       '/assets/index.js',
-      '/assets/tile-bw.png',
-      '/assets/tile-satellite.png',
-      '/assets/tile-street.png',
+      '/assets/layer-1.png',
+      '/assets/layer-3.png',
+      '/assets/layer-2.png',
       '/logo.png',
       'manifest.json'
     ])

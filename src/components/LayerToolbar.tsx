@@ -15,9 +15,9 @@ export default function LayerToolbar(props: {
   }
 
   const tileLayerTypeToImage = new Map([
-    [TileLayerType.BW, "tile-bw.png"],
-    [TileLayerType.SATELLITE, "tile-satellite.png"],
-    [TileLayerType.STREET, "tile-street.png"]
+    [TileLayerType.BW, "layer-1.png"],
+    [TileLayerType.SATELLITE, "layer-3.png"],
+    [TileLayerType.STREET, "layer-2.png"]
   ]);
 
   const tileLayerTypeToAlt = new Map([
