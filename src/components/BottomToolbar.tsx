@@ -20,7 +20,7 @@ export function BottomToolbar(props: {
   const [lastDrawInteraction, setLastDrawInteraction] =
     useState<DrawInteraction>({type: InteractionType.Line, isFreeHand: props.isFreeHand} as DrawInteraction);
 
-  const buttonStaticClass = "w-12 h-12 rounded flex justify-center items-center group relative hover:bg-gray-300";
+  const buttonStaticClass = "w-12 h-12 rounded flex justify-center items-center group relative bg-white hover:bg-gray-300";
   const buttonDynamicClass = (isActive: boolean) => {
     const dynamicClass = isActive ? "bg-gray-500 text-white hover:bg-gray-500 hover:text-white" : "bg-gray-200 text-black";
     return `${buttonStaticClass} ${dynamicClass}`;
@@ -50,9 +50,9 @@ export function BottomToolbar(props: {
   }
 
   return (
-    <div className="absolute bottom-0 left-0 h-12 w-full bg-white">
+    <div className="absolute bottom-0 left-0 h-12 w-full bg-none">
       <div className="w-full h-full flex justify-between px-4">
-        <div className="w-full h-full flex justify-start">
+        <div className="w-full h-full flex justify-start space-x-2">
           <button
               onClick={() => onInteractionTypeChange(InteractionType.None)}
               className={buttonClassByInteractionType(InteractionType.None)}>
@@ -117,22 +117,16 @@ export function BottomToolbar(props: {
             <svg className="w-6 h-6" viewBox="0 0 24 24" strokeWidth="1.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.998 2H2v2.998h2.998V2zM4.999 3.501h14M3.5 4.999V19M20.498 5v14.002M4.999 20.501h14M4.998 19H2v2.998h2.998V19zM21.997 2.002H19V5h2.998V2.002zM21.997 19.002H19V22h2.998v-2.998z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path clipRule="evenodd" d="M10.997 15.002l-3-7 7 3-2.998.999-1.002 3.001z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path clipRule="evenodd" d="M11.999 12.002l2.998 3-2.998-3z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
         </div>
-        <div className="w-full h-full flex justify-end space-x-4">
+        <div className="w-full h-full flex justify-end">
           <button
               onClick={props.onUndo}
-              className={buttonStaticClass}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
-            </svg>
-            <span className="w-auto absolute hidden group-hover:flex -left-0 -top-0 -translate-y-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm z-10">Undo</span>
+              className={`${buttonStaticClass} rounded-r-none`}>
+            <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7v5M7.875 9.5h7c5.5 0 5.5 8.5 0 8.5h-10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path d="M11.375 13l-3.5-3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
           <button
               onClick={props.onRedo}
-              className={buttonStaticClass}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3"/>
-            </svg>
-            <span className="w-auto absolute hidden group-hover:flex -left-0 -top-0 -translate-y-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm z-10">Redo</span>
+              className={`${buttonStaticClass} rounded-l-none`}>
+            <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 7v5M16 9.5H9C3.5 9.5 3.5 18 9 18h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path d="M12.5 13L16 9.5 12.5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
         </div>
       </div>
