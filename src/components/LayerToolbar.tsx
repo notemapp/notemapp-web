@@ -27,7 +27,7 @@ export default function LayerToolbar(props: {
   ]);
 
   return (
-    <div className="absolute bottom-12 right-0 h-auto w-auto grid grid-cols-1 justify-items-end space-y-1">
+    <div className="absolute bottom-20 right-0 h-auto w-auto grid grid-cols-1 justify-items-end space-y-1">
       {
         tileLayers.slice().reverse().slice(0, -1).map(tileLayerType => (
           <button

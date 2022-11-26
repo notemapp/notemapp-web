@@ -19,6 +19,7 @@ export default function Navbar(props: {
           </svg>
           <span className="w-auto absolute hidden group-hover:flex -left-0 -bottom-0 translate-y-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Back</span>
         </button>
+        <img src="/assets/logo512-mt.svg" alt="logo" className="w-12 h-12"/>
         <button
           onClick={props.onOpenDrawer}
           className="w-12 h-full rounded flex justify-center items-center hover:bg-gray-300 group relative"

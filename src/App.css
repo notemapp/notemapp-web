@@ -1,6 +1,6 @@
-/* Move OSM attribution above toolbar */
-.ol-attribution.ol-uncollapsible {
-    bottom: 3rem!important;
+/* Hide default OSM attribution */
+.ol-attribution {
+    display: none!important;
 }
 
 /* Hide default map controls */

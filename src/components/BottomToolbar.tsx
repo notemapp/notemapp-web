@@ -20,29 +20,31 @@ export function BottomToolbar(props: {
   const [lastDrawInteraction, setLastDrawInteraction] =
     useState<DrawInteraction>({type: InteractionType.Line, isFreeHand: props.isFreeHand} as DrawInteraction);
 
-  const buttonStaticClass = "w-12 h-12 rounded flex justify-center items-center group relative bg-white hover:bg-gray-300";
+  const buttonStaticClass =
+    "w-12 h-12 rounded flex justify-center items-center group relative bg-gray-100 hover:bg-gray-300";
   const buttonDynamicClass = (isActive: boolean) => {
-    const dynamicClass = isActive ? "bg-gray-500 text-white hover:bg-gray-500 hover:text-white" : "bg-gray-200 text-black";
+    const dynamicClass =
+      isActive ? "bg-yellow-600 text-white hover:bg-yellow-600 hover:text-white" : "bg-gray-100 text-black";
     return `${buttonStaticClass} ${dynamicClass}`;
   }
   const buttonClassByInteractionType = (thisInteractionType: InteractionType) =>
       buttonDynamicClass(interactionType === thisInteractionType);
   const buttonClassByFreeHand = (isFreeHand: boolean) =>
       buttonDynamicClass(isFreeHand);
-  const drawToolbarClassByInteractionType = (thisDrawType: InteractionType) =>
+  const drawInteractionButtonClass = (thisDrawType: InteractionType) =>
       buttonDynamicClass(DRAW_INTERACTIONS.includes(thisDrawType));
 
   const onInteractionTypeChange = (type: InteractionType) => {
     props.onInteractionTypeChange(type);
     setInteractionType(type);
     if (DRAW_INTERACTIONS.includes(type)) {
+      // Save last draw interaction to restore it when switching back to draw mode:
       setLastDrawInteraction({type, isFreeHand} as DrawInteraction);
     }
   }
   const onDrawInteractionClick = () => {
     onInteractionTypeChange(lastDrawInteraction.type);
     onFreeHandToggle(lastDrawInteraction.isFreeHand);
-    console.log("onDrawInteractionClick", lastDrawInteraction);
   }
   const onFreeHandToggle = (isActive: boolean) => {
     props.onFreeHandToggle(isActive);
@@ -50,27 +52,25 @@ export function BottomToolbar(props: {
   }
 
   return (
-    <div className="absolute bottom-0 left-0 h-12 w-full bg-none">
-      <div className="w-full h-full flex justify-between px-4">
+    <div className="w-full h-12 absolute bottom-4 left-0 bg-none px-4">
+      <div className="w-full h-full flex justify-between">
         <div className="w-full h-full flex justify-start space-x-2">
           <button
               onClick={() => onInteractionTypeChange(InteractionType.None)}
-              className={buttonClassByInteractionType(InteractionType.None)}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.05 4.575a1.575 1.575 0 10-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 013.15 0v1.5m-3.15 0l.075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 013.15 0V15M6.9 7.575a1.575 1.575 0 10-3.15 0v8.175a6.75 6.75 0 006.75 6.75h2.018a5.25 5.25 0 003.712-1.538l1.732-1.732a5.25 5.25 0 001.538-3.712l.003-2.024a.668.668 0 01.198-.471 1.575 1.575 0 10-2.228-2.228 3.818 3.818 0 00-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0116.35 15m.002 0h-.002"/>
-            </svg>
+              className={`${buttonClassByInteractionType(InteractionType.None)} shadow drop-shadow-lg`}>
+            <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 14.571l-1.823-1.736a1.558 1.558 0 00-2.247.103v0a1.558 1.558 0 00.035 2.092l5.942 6.338c.379.403.906.632 1.459.632H16c2.4 0 4-2 4-4 0 0 0 0 0 0V9.429" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path d="M17 10v-.571c0-2.286 3-2.286 3 0M14 10V8.286C14 6 17 6 17 8.286V10M11 10V7.5c0-2.286 3-2.286 3 0 0 0 0 0 0 0V10M8 14.571V3.5A1.5 1.5 0 019.5 2v0c.828 0 1.5.67 1.5 1.499V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
           <div className="group relative">
             <button
               onClick={onDrawInteractionClick}
-              className={drawToolbarClassByInteractionType(interactionType)}
+              className={`${drawInteractionButtonClass(interactionType)} shadow drop-shadow-lg`}
             >
               <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.02 5.828L15.85 3l4.949 4.95-2.829 2.828m-4.95-4.95l-9.606 9.607a1 1 0 00-.293.707v4.536h4.536a1 1 0 00.707-.293l9.606-9.607m-4.95-4.95l4.95 4.95" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
             </button>
             <span
                 className="
-                h-auto w-max absolute flex -left-1/2 -top-0 -translate-y-full bg-white rounded-lg
-                text-center text-white grid grid-cols-1 invisible group-hover:visible shadow drop-shadow-2xl
+                w-max h-auto absolute flex top-1 left-1/2 -translate-x-1/2 -translate-y-full z-10 bg-white rounded-lg
+                text-center text-white grid grid-cols-1 invisible group-hover:visible shadow drop-shadow-lg
                 "
             >
               <div className="grid gap-2 p-3">
@@ -108,16 +108,16 @@ export function BottomToolbar(props: {
           </div>
           <button
               onClick={() => onInteractionTypeChange(InteractionType.Marker)}
-              className={buttonClassByInteractionType(InteractionType.Marker)}>
+              className={`${buttonClassByInteractionType(InteractionType.Marker)} shadow drop-shadow-lg`}>
             <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 14h8M8 10h2M8 18h4M10 3H6a2 2 0 00-2 2v15a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2h-3.5M10 3V1m0 2v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
           <button
               onClick={() => onInteractionTypeChange(InteractionType.Select)}
-              className={buttonClassByInteractionType(InteractionType.Select)}>
+              className={`${buttonClassByInteractionType(InteractionType.Select)} shadow drop-shadow-lg`}>
             <svg className="w-6 h-6" viewBox="0 0 24 24" strokeWidth="1.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.998 2H2v2.998h2.998V2zM4.999 3.501h14M3.5 4.999V19M20.498 5v14.002M4.999 20.501h14M4.998 19H2v2.998h2.998V19zM21.997 2.002H19V5h2.998V2.002zM21.997 19.002H19V22h2.998v-2.998z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path clipRule="evenodd" d="M10.997 15.002l-3-7 7 3-2.998.999-1.002 3.001z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path clipRule="evenodd" d="M11.999 12.002l2.998 3-2.998-3z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
         </div>
-        <div className="w-full h-full flex justify-end">
+        <div className="w-auto h-full flex justify-end rounded shadow drop-shadow-lg">
           <button
               onClick={props.onUndo}
               className={`${buttonStaticClass} rounded-r-none`}>
