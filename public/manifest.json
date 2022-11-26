@@ -5,12 +5,14 @@
     {
       "src": "/assets/logo512-mw.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
       "src": "/assets/logo512-mw.svg",
       "type": "image/svg+xml",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
       "src": "/assets/logo512-mw.png",
