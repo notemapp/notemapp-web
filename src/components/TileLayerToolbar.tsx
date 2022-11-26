@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {TileLayerType} from "../core/TileLayerType";
 
 const TILE_LAYERS = [
@@ -25,13 +25,18 @@ export default function TileLayerToolbar(props: {
   const getOtherLayers = (currentLayer: TileLayerType) =>
     TILE_LAYERS.filter((layer) => layer !== currentLayer);
 
-  const [tileLayers, setTileLayers] =
-    useState<TileLayerType[]>([currentLayer, ...getOtherLayers(currentLayer)]);
+  const [tileLayers, setTileLayers] = useState<TileLayerType[]|undefined>(undefined);
 
   const onTileLayerToggle = (tileLayerType: TileLayerType) => {
     setTileLayers(_ => [tileLayerType, ...getOtherLayers(tileLayerType)])
     props.onTileLayerToggle(tileLayerType);
   }
+
+  useEffect(() => {
+    if (currentLayer !== undefined) {
+      setTileLayers(_ => [currentLayer, ...getOtherLayers(currentLayer)])
+    }
+  }, [currentLayer]);
 
   return (
     <div className="w-auto h-auto absolute bottom-20 right-4 justify-items-end space-y-1">
