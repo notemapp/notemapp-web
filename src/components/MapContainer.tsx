@@ -5,7 +5,7 @@ import {Feature, Geolocation, Overlay} from "ol";
 import Map from "ol/Map";
 import {Draw, Select} from "ol/interaction";
 import "ol/ol.css";
-import {set, update} from 'idb-keyval';
+import {get, set, update} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
 import {InteractionType} from "../core/InteractionType";
@@ -21,7 +21,7 @@ import {initMap} from "../core/controller/MapController";
 import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
 import {Note} from "../core/Note";
 import LayerGroup from "ol/layer/Group";
-import LayerToolbar from "./LayerToolbar";
+import TileLayerToolbar from "./TileLayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
@@ -76,6 +76,7 @@ export default function MapContainer(props: {
 
   const drawTypeRef = useRef<InteractionType>(InteractionType.None);
   const freeHandRef = useRef<boolean>(true);
+  const [currentLayer, setCurrentLayer] = useState<TileLayerType|undefined>(undefined);
 
   const [selectedFeature, setSelectedFeature] = useState<boolean>(false);
   const onSelectedFeature = (event: SelectEvent) => {
@@ -152,6 +153,8 @@ export default function MapContainer(props: {
 
     initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);
 
+    getInitialLayer();
+
   }, []);
 
   // Geolocation
@@ -165,6 +168,18 @@ export default function MapContainer(props: {
       initGeolocation(geolocationRef, mapRef, locationFeatureRef);
       log("[INIT] Geolocation initialized");
     }
+  }
+
+  const getInitialLayer = () => {
+
+    get(noteId, storageContext?.notePrefsStoreRef.current).then((view: any) => {
+      let lastLayer = TileLayerType.PAPER;
+      if (view) {
+        lastLayer = view?.layer || TileLayerType.PAPER;
+      }
+      setCurrentLayer(lastLayer);
+    });
+
   }
 
   const onTileLayerToggle = (tileLayerType: TileLayerType) => {
@@ -183,6 +198,7 @@ export default function MapContainer(props: {
           });
         }
       });
+      setCurrentLayer(tileLayerType);
     }
   }
 
@@ -198,7 +214,7 @@ export default function MapContainer(props: {
 
   return (
     <div>
-      <div ref={mapContainerRef} className={style.mapContainer}></div>
+      <div ref={mapContainerRef} className={`${style.mapContainer} -z-50`}></div>
       <div ref={popupContainerRef} className={style.olPopup}>
         <a href="#" ref={popupCloserRef} className={style.olPopupCloser}></a>
         <div ref={popupContentRef}></div>
@@ -212,7 +228,7 @@ export default function MapContainer(props: {
         onRedo={onRedo}
       />
       <SideToolbar onLocate={onLocate} onDeleteFeature={onDeleteFeature} selectedFeature={selectedFeature} />
-      <LayerToolbar onTileLayerToggle={onTileLayerToggle} />
+      <TileLayerToolbar onTileLayerToggle={onTileLayerToggle} currentLayer={currentLayer} />
     </div>
   );
 

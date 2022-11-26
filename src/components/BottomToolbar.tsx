@@ -57,20 +57,22 @@ export function BottomToolbar(props: {
         <div className="w-full h-full flex justify-start space-x-2">
           <button
               onClick={() => onInteractionTypeChange(InteractionType.None)}
-              className={`${buttonClassByInteractionType(InteractionType.None)} shadow drop-shadow-lg`}>
+              className={`${buttonClassByInteractionType(InteractionType.None)} shadow drop-shadow-lg z-10`}>
             <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 14.571l-1.823-1.736a1.558 1.558 0 00-2.247.103v0a1.558 1.558 0 00.035 2.092l5.942 6.338c.379.403.906.632 1.459.632H16c2.4 0 4-2 4-4 0 0 0 0 0 0V9.429" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path><path d="M17 10v-.571c0-2.286 3-2.286 3 0M14 10V8.286C14 6 17 6 17 8.286V10M11 10V7.5c0-2.286 3-2.286 3 0 0 0 0 0 0 0V10M8 14.571V3.5A1.5 1.5 0 019.5 2v0c.828 0 1.5.67 1.5 1.499V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
           </button>
           <div className="group relative">
             <button
               onClick={onDrawInteractionClick}
-              className={`${drawInteractionButtonClass(interactionType)} shadow drop-shadow-lg`}
+              className={`${drawInteractionButtonClass(interactionType)} shadow drop-shadow-lg z-10`}
             >
               <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.02 5.828L15.85 3l4.949 4.95-2.829 2.828m-4.95-4.95l-9.606 9.607a1 1 0 00-.293.707v4.536h4.536a1 1 0 00.707-.293l9.606-9.607m-4.95-4.95l4.95 4.95" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
             </button>
             <span
                 className="
-                w-max h-auto absolute flex top-1 left-1/2 -translate-x-1/2 -translate-y-full z-10 bg-white rounded-lg
-                text-center text-white grid grid-cols-1 invisible group-hover:visible shadow drop-shadow-lg
+                w-max h-auto absolute flex bottom-0 left-1/2 -translate-x-1/2 z-0 bg-white rounded-lg
+                text-center text-white grid grid-cols-1 shadow drop-shadow-lg
+                transition-all duration-400 ease-in-out opacity-0
+                group-hover:transition-all group-hover:opacity-100 group-hover:-translate-y-14
                 "
             >
               <div className="grid gap-2 p-3">
