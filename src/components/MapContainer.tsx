@@ -25,7 +25,6 @@ import LayerToolbar from "./LayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
-import {tile} from "ol/loadingstrategy";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -76,7 +75,7 @@ export default function MapContainer(props: {
   const geolocationRef = useRef<Geolocation>();
 
   const drawTypeRef = useRef<InteractionType>(InteractionType.None);
-  const freeHandRef = useRef<boolean>(false);
+  const freeHandRef = useRef<boolean>(true);
 
   const [selectedFeature, setSelectedFeature] = useState<boolean>(false);
   const onSelectedFeature = (event: SelectEvent) => {
@@ -89,8 +88,8 @@ export default function MapContainer(props: {
     }
   }
 
-  const onFreeHandToggle = () => {
-    freeHandRef.current = !freeHandRef.current;
+  const onFreeHandToggle = (isActive: boolean) => {
+    freeHandRef.current = isActive;
     log("[UPDATE] FreeHand:", freeHandRef.current);
     updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
       mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, featuresLayerRef, noteId, storageContext,
