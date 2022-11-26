@@ -27,11 +27,6 @@ export default function TileLayerToolbar(props: {
 
   const [tileLayers, setTileLayers] = useState<TileLayerType[]|undefined>(undefined);
 
-  const onTileLayerToggle = (tileLayerType: TileLayerType) => {
-    setTileLayers(_ => [tileLayerType, ...getOtherLayers(tileLayerType)])
-    props.onTileLayerToggle(tileLayerType);
-  }
-
   useEffect(() => {
     if (currentLayer !== undefined) {
       setTileLayers(_ => [currentLayer, ...getOtherLayers(currentLayer)])
@@ -65,7 +60,7 @@ export default function TileLayerToolbar(props: {
                   <button
                     key={tileLayerType}
                     className="w-20 h-20 shadow rounded drop-shadow-lg"
-                    onClick={() => onTileLayerToggle(tileLayerType)}
+                    onClick={() => props.onTileLayerToggle(tileLayerType)}
                   >
                     <img
                       src={'/assets/' + TILE_LAYER_TYPE_TO_IMG.get(tileLayerType)}
