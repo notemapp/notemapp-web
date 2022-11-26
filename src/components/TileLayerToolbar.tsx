@@ -50,8 +50,9 @@ export default function TileLayerToolbar(props: {
               className="
                 w-max h-auto absolute flex bottom-2 right-0 rounded-lg -z-10
                 text-center text-white grid grid-cols-1 shadow drop-shadow-lg space-y-1
-                transition-all duration-400 ease-in-out opacity-0
-                group-hover:transition-all group-hover:opacity-100 group-hover:-translate-y-24
+                transition-all ease-in-out opacity-0 pointer-events-none
+                group-hover:transition-all group-hover:duration-500 group-hover:opacity-100
+                group-hover:-translate-y-24 hover:-translate-y-24 group-hover:pointer-events-auto
               "
             >
               {

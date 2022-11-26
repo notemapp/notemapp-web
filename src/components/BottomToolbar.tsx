@@ -71,8 +71,9 @@ export function BottomToolbar(props: {
                 className="
                 w-max h-auto absolute flex bottom-0 left-1/2 -translate-x-1/2 z-0 bg-white rounded-lg
                 text-center text-white grid grid-cols-1 shadow drop-shadow-lg
-                transition-all duration-400 ease-in-out opacity-0
-                group-hover:transition-all group-hover:opacity-100 group-hover:-translate-y-14
+                transition-all ease-in-out opacity-0 pointer-events-none
+                group-hover:transition-all group-hover:duration-500 group-hover:opacity-100
+                group-hover:-translate-y-14 hover:-translate-y-14 group-hover:pointer-events-auto
                 "
             >
               <div className="grid gap-2 p-3">
