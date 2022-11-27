@@ -17,7 +17,7 @@ export default function SideToolbar(props: {
   return (
     <div className="absolute top-12 right-0 w-12 h-auto bg-white rounded">
       <div className="w-full h-full flex justify-between py-0 grid grid-cols-1">
-        <button className={"text-white rounded w-full h-12 flex justify-center items-center group relative " + buttonClass} onClick={onLocate}>
+        <button className={"rounded w-full h-12 flex justify-center items-center group relative " + buttonClass} onClick={onLocate}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
                stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -27,7 +27,7 @@ export default function SideToolbar(props: {
           <span className="w-auto absolute hidden group-hover:flex left-0 -translate-x-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Locate</span>
         </button>
         { props.selectedFeature &&
-          <button className="text-white rounded w-full h-12 flex justify-center items-center group relative text-black"
+          <button className="rounded w-full h-12 flex justify-center items-center group relative text-black"
                   onClick={props.onDeleteFeature}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
                  stroke="currentColor" className="w-6 h-6">
