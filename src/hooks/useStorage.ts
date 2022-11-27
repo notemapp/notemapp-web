@@ -1,10 +1,11 @@
 import {useContext} from "react";
-import {StorageContext} from "../components/StorageContext";
+import {NotePrefs, StorageContext} from "../components/StorageContext";
 import {Feature} from "ol";
-import {set, update} from "idb-keyval";
+import {get, set, update} from "idb-keyval";
 import {GeoJSON} from "ol/format";
 import log from "../core/Logger";
 import {Note} from "../core/Note";
+import {TileLayerType} from "../core/TileLayerType";
 
 const useStorage = () => {
 
@@ -31,9 +32,39 @@ const useStorage = () => {
 
   }
 
+  function updateLastUsedLayer(id: string, layer: TileLayerType, onUpdate: (() => void)|undefined = undefined) {
+
+    if (!onUpdate) onUpdate = () => log("[UPDATE] Updated last used layer on store");
+
+    update(id, (note) => {return {...note, layer: layer.valueOf()}}, storageContext?.notePrefsStoreRef.current)
+      .then(onUpdate)
+
+  }
+
+  function updateFeatures(id: string, newFeatures: Feature[], onUpdate: (() => void)|undefined = undefined) {
+
+    if (!onUpdate) onUpdate = () => log("[UPDATE] Updated features on store");
+
+    saveFeatures(id, newFeatures, () => {
+      updateModifiedOn(id, new Date(), onUpdate);
+    });
+
+  }
+
+  function fetchLastUsedLayer(id: string, onFetch: (layer: TileLayerType) => void) {
+
+    get(id, storageContext?.notePrefsStoreRef.current).then((prefs: NotePrefs) => {
+      onFetch(prefs?.layer || TileLayerType.PAPER);
+    });
+
+  }
+
   return {
     saveFeatures,
-    updateModifiedOn
+    updateFeatures,
+    updateModifiedOn,
+    updateLastUsedLayer,
+    fetchLastUsedLayer
   };
 
 };

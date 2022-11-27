@@ -1,30 +1,19 @@
-import {MutableRefObject, RefObject, useContext, useEffect, useRef, useState} from "react";
+import {MutableRefObject, RefObject, useEffect, useRef, useState} from "react";
 import VectorSource from "ol/source/Vector";
-import {Feature, Geolocation, Overlay} from "ol";
+import {Overlay} from "ol";
 import Map from "ol/Map";
 import "ol/ol.css";
-import {get, set, update} from 'idb-keyval';
-import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
 import {InteractionType} from "../core/InteractionType";
-import log from "../core/Logger";
 import SideToolbar from "./SideToolbar";
-import {StorageContext} from "./StorageContext";
-import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
-import {Note} from "../core/Note";
 import LayerGroup from "ol/layer/Group";
 import TileLayerToolbar from "./TileLayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import useMapInteractions from "../hooks/useMapInteractions";
 import VectorLayer from "ol/layer/Vector";
 import AnnotationMarkerPopup from "./AnnotationMarkerPopup";
-
-export const updateNoteMeta = (note: Note) => {
-  return {
-    ...note,
-    modifiedOn: new Date().toISOString()
-  }
-}
+import useStorage from "../hooks/useStorage";
+import useMapGeolocation from "../hooks/useMapGeolocation";
 
 export default function MapContainer(props: {
   noteId: string,
@@ -45,103 +34,65 @@ export default function MapContainer(props: {
     popupContainerRef: RefObject<HTMLDivElement>,
     popupCloserRef: RefObject<HTMLDivElement>,
     popupContentRef: RefObject<HTMLDivElement>,
-    popupOverlayRef: MutableRefObject<Overlay|undefined>,
+    popupOverlayRef: MutableRefObject<Overlay | undefined>,
   }
 }) {
 
   const noteId = props.noteId;
 
-  const storageContext = useContext(StorageContext);
+  const storage = useStorage();
 
   const mapRef = props.mapRef.mapRef;
   const mapContainerRef = props.mapRef.mapContainerRef;
 
   const featuresSourceRef = props.sourcesRef.featuresSourceRef;
-  const locationSourceRef = props.sourcesRef.locationSourceRef;
   const featuresLayerRef = props.layersRef.featuresLayerRef;
 
-  // Interactions
-  const {updateInteraction, selectedFeatureRef, undoRedoInteractionRef, selectedFeature, setSelectedFeature} = useMapInteractions(
-    noteId,
-    mapRef,
-    featuresSourceRef,
-    featuresLayerRef,
-    props.popupRef);
+  const {onGeolocate} = useMapGeolocation(mapRef, props.sourcesRef.locationSourceRef);
 
-  // Geolocation
-  const geolocationRef = useRef<Geolocation>();
-
-  const drawTypeRef = useRef<InteractionType>(InteractionType.None);
-  const freeHandRef = useRef<boolean>(true);
   const [currentLayer, setCurrentLayer] = useState<TileLayerType|undefined>(undefined);
 
+  // Interactions
+  const {updateInteraction, undoRedoInteractionRef, selectedFeatureRef, selectedFeature, setSelectedFeature} =
+    useMapInteractions(noteId, mapRef, featuresSourceRef, featuresLayerRef, props.popupRef);
+  const interactionTypeRef = useRef<InteractionType>(InteractionType.None);
+  const isFreeHandRef = useRef<boolean>(true);
+
   const onFreeHandToggle = (isActive: boolean) => {
-    freeHandRef.current = isActive;
-    log("[UPDATE] FreeHand:", freeHandRef.current);
-    updateInteraction(drawTypeRef.current, freeHandRef.current);
+    isFreeHandRef.current = isActive;
+    updateInteraction(interactionTypeRef.current, isFreeHandRef.current);
   }
   const onInteractionTypeChange = (type: InteractionType) => {
-    drawTypeRef.current = type;
-    updateInteraction(drawTypeRef.current, freeHandRef.current);
+    interactionTypeRef.current = type;
+    updateInteraction(interactionTypeRef.current, isFreeHandRef.current);
   }
-  const updateNotesStore = () => {
-    set(
-      noteId,
-      new GeoJSON().writeFeatures(featuresSourceRef.current?.getFeatures() || []),
-      storageContext?.noteStoreRef.current
-    ).then(() =>
-      update(noteId, (note) => updateNoteMeta(note), storageContext?.noteMetaStoreRef.current)
-    );
-  }
+
+
+
+
   const onDeleteFeature = () => {
     if (selectedFeatureRef.current) {
       featuresSourceRef.current?.removeFeature(selectedFeatureRef.current);
       selectedFeatureRef.current = undefined;
       setSelectedFeature(false);
-      updateNotesStore();
+      storage.updateFeatures(noteId, featuresSourceRef.current?.getFeatures() || []);
     }
   }
   const onUndo = () => {
     undoRedoInteractionRef.current?.undo();
-    updateNotesStore();
+    storage.updateFeatures(noteId, featuresSourceRef.current?.getFeatures() || []);
   }
   const onRedo = () => {
     undoRedoInteractionRef.current?.redo();
-    updateNotesStore();
+    storage.updateFeatures(noteId, featuresSourceRef.current?.getFeatures() || []);
   }
 
-  useEffect(() => getInitialLayer(), []);
-
-  // Geolocation
-  // -----------
-  const locationFeatureRef = useRef<Feature>();
-  useEffect(() => initLocationFeatureRef(locationFeatureRef), []);
-
-  const onLocate = () => {
-    if (!geolocationRef.current) {
-      locationFeatureRef.current && locationSourceRef.current?.addFeature(locationFeatureRef.current);
-      initGeolocation(geolocationRef, mapRef, locationFeatureRef);
-      log("[INIT] Geolocation initialized");
-    }
-  }
-
-  const getInitialLayer = () => {
-
-    get(noteId, storageContext?.notePrefsStoreRef.current).then((view: any) => {
-      let lastLayer = TileLayerType.PAPER;
-      if (view) {
-        lastLayer = view?.layer || TileLayerType.PAPER;
-      }
-      setCurrentLayer(lastLayer);
-    });
-
-  }
+  useEffect(() =>
+    storage.fetchLastUsedLayer(noteId, (layer: TileLayerType) => setCurrentLayer(layer)), []);
 
   const onTileLayerToggle = (tileLayerType: TileLayerType) => {
     if (mapRef.current) {
-      update(noteId, (note) => {return {...note, layer: tileLayerType.valueOf()}}, storageContext?.notePrefsStoreRef.current).then(() => {
-        log("[UPDATE] TileLayer:", tileLayerType);
-      })
+      storage.updateLastUsedLayer(noteId, tileLayerType);
       mapRef.current.getLayerGroup().getLayers().forEach((layer) => {
         if (layer instanceof LayerGroup) {
           layer.getLayers().forEach((l, i) => {
@@ -159,17 +110,17 @@ export default function MapContainer(props: {
 
   return (
     <div>
-      <div ref={mapContainerRef} className={`w-screen h-screen -z-50`}></div>
+      <div ref={mapContainerRef} className="w-screen h-screen -z-50"></div>
       <AnnotationMarkerPopup popupRef={props.popupRef} />
       <BottomToolbar
-        interactionType={drawTypeRef.current}
-        isFreeHand={freeHandRef.current}
+        interactionType={interactionTypeRef.current}
+        isFreeHand={isFreeHandRef.current}
         onInteractionTypeChange={onInteractionTypeChange}
         onFreeHandToggle={onFreeHandToggle}
         onUndo={onUndo}
         onRedo={onRedo}
       />
-      <SideToolbar onLocate={onLocate} onDeleteFeature={onDeleteFeature} selectedFeature={selectedFeature} />
+      <SideToolbar onLocate={onGeolocate} onDeleteFeature={onDeleteFeature} selectedFeature={selectedFeature} />
       <TileLayerToolbar onTileLayerToggle={onTileLayerToggle} currentLayer={currentLayer} />
     </div>
   );
