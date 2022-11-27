@@ -11,7 +11,7 @@ export default function AnnotationMarkerPopup(props: {
   return (
     <div
       ref={props.popupRef.popupContainerRef}
-      className="w-80 h-auto bottom-0 left-0 absolute bg-white p-4 rounded-lg drop-shadow-lg"
+      className="w-80 max-h-96 bottom-0 left-0 absolute bg-white p-4 rounded-lg drop-shadow-lg"
     >
       <a
         href="#"
@@ -20,7 +20,10 @@ export default function AnnotationMarkerPopup(props: {
       >
         <svg className="text-black w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
       </a>
-      <div ref={props.popupRef.popupContentRef}></div>
+      <div
+        ref={props.popupRef.popupContentRef}
+        className="w-full max-h-96 overflow-auto"
+      />
     </div>
   );
 
