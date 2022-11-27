@@ -65,12 +65,12 @@ const useMapLayers = (
             })
           })
         ]
-      })
+      });
 
       get(id, storageContext?.notePrefsStoreRef.current).then((prefs: NotePrefs) => {
         const lastUsedLayer = prefs?.layer || TileLayerType.PAPER;
         layer.current?.getLayers().forEach((l, i) => l.setVisible(i === lastUsedLayer.valueOf()));
-        log("[INIT] Loaded last layer:", lastUsedLayer.toString());
+        log("[INIT] Loaded last layer from store:", lastUsedLayer.toString());
       });
 
     }

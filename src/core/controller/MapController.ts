@@ -1,4 +1,3 @@
-import {get as getProjection} from "ol/proj";
 import Map from "ol/Map";
 import {Overlay, View} from "ol";
 import {MutableRefObject, RefObject} from "react";
@@ -28,9 +27,7 @@ function initMap(
 
     // Avoid panning too much
     // @ts-ignore
-    const extent = getProjection('EPSG:3857').getExtent().slice();
-    extent[0] += extent[0];
-    extent[2] += extent[2];
+    const extent = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 
     // Instantiate map
     mapRef.current = new Map({
