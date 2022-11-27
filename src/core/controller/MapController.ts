@@ -6,7 +6,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import {get, update} from "idb-keyval";
 import log from "../Logger";
-import {StorageContextInterface} from "../../components/StorageContext";
+import {NotePrefs, StorageContextInterface} from "../../components/StorageContext";
 import LayerGroup from "ol/layer/Group";
 import {EventsKey} from "ol/events";
 import {fileSave} from "browser-fs-access";
@@ -51,7 +51,7 @@ function initMap(
         zoom: mapRef.current?.getView().getZoom(),
         rotation: mapRef.current?.getView().getRotation()
       };
-      update(noteId, (prevView) => {return {layer: 0, ...prevView, ...currentView}}, storageContext?.notePrefsStoreRef.current)
+      update(noteId, (prevView: NotePrefs|undefined) => {return {layer: 0, ...prevView, ...currentView} as NotePrefs}, storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
     });
 

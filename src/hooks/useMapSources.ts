@@ -38,6 +38,6 @@ const useMapSources = (id: string) => {
 
   return {featuresSourceRef, locationSourceRef, initMapSources};
 
-}
+};
 
 export default useMapSources;

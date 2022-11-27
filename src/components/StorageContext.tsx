@@ -1,11 +1,20 @@
 import {createContext, MutableRefObject, ReactNode, useLayoutEffect, useRef} from "react";
 import {createStore, UseStore} from "idb-keyval";
 import {DB_NOTES, DB_NOTES_META, DB_NOTES_PREFS, STORE_NOTES, STORE_NOTES_META, STORE_NOTES_PREFS} from "../core/Keys";
+import {TileLayerType} from "../core/TileLayerType";
+import {Coordinate} from "ol/coordinate";
 
 export interface StorageContextInterface {
   noteStoreRef: MutableRefObject<UseStore|undefined>;
   notePrefsStoreRef: MutableRefObject<UseStore|undefined>;
   noteMetaStoreRef: MutableRefObject<UseStore|undefined>;
+}
+
+export interface NotePrefs {
+  layer: TileLayerType;
+  center: Coordinate;
+  zoom: number;
+  rotation: number;
 }
 
 export const StorageContext = createContext<StorageContextInterface|null>(null);

@@ -1,6 +1,5 @@
 import {MutableRefObject, useContext, useEffect, useRef, useState} from "react";
 import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
 import {Feature, Geolocation, Overlay} from "ol";
 import Map from "ol/Map";
 import {Draw, Select} from "ol/interaction";
@@ -15,7 +14,6 @@ import style from "./MapContainer.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
 import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
-import {initLayers} from "../core/controller/MapLayerController";
 import {initMap} from "../core/controller/MapController";
 import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
 import {Note} from "../core/Note";
@@ -25,6 +23,7 @@ import {TileLayerType} from "../core/TileLayerType";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
 import useMapSources from "../hooks/useMapSources";
+import useMapLayers from "../hooks/useMapLayers";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -54,9 +53,7 @@ export default function MapContainer(props: {
   const {featuresSourceRef, locationSourceRef, initMapSources} = useMapSources(noteId);
 
   // Layers
-  const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
-  const locationLayerRef = useRef<VectorLayer<VectorSource>>();
-  const tileLayerGroupRef = useRef<LayerGroup>();
+  const {featuresLayerRef, locationLayerRef, tileLayerGroupRef, initMapLayers} = useMapLayers(noteId, featuresSourceRef, locationSourceRef);
 
   // Overlays
   const popupOverlayRef = useRef<Overlay>();
@@ -130,8 +127,7 @@ export default function MapContainer(props: {
   useEffect(() => {
 
     initMapSources();
-    // @ts-ignore
-    initLayers(noteId, featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef, storageContext);
+    initMapLayers();
 
     if (!popupOverlayRef.current) {
       popupOverlayRef.current = new Overlay({
