@@ -1,59 +1,27 @@
 import {MutableRefObject, useState} from "react";
 import Navbar from "./Navbar";
 import MapPageDrawer from "./MapPageDrawer";
-import {exportAsImage} from "../core/controller/MapController";
-import {GeoJSON} from "ol/format";
 import Map from "ol/Map";
 import VectorSource from "ol/source/Vector";
-import {fileOpen, fileSave} from "browser-fs-access";
-import useStorage from "../hooks/useStorage";
+import useMapImportExport from "../hooks/useMapImportExport";
 
 export default function MapPageNavigation(props: {
-  mapRef: MutableRefObject<Map|undefined>,
-  featuresSourceRef: MutableRefObject<VectorSource|undefined>,
-  noteId: string
+  noteId: string,
+  mapRef: MutableRefObject<Map | undefined>,
+  featuresSourceRef: MutableRefObject<VectorSource | undefined>
 }) {
 
-  const storage = useStorage();
   const noteId = props.noteId;
   const mapRef = props.mapRef;
   const featuresSourceRef = props.featuresSourceRef;
 
+  const importExport = useMapImportExport(mapRef, featuresSourceRef);
+
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
-  const onExportAsImage = () => {
-    if (mapRef.current) {
-      exportAsImage(mapRef.current);
-      setDrawerOpen(false);
-    }
-  }
-
-  const onImportFromFile = async () => {
-    if (featuresSourceRef.current) {
-      const file = await fileOpen();
-      const text = await file.text();
-      try {
-        const features = new GeoJSON().readFeatures(text);
-        featuresSourceRef.current.addFeatures(features);
-        storage.saveFeatures(noteId, featuresSourceRef.current.getFeatures());
-      } catch (e) {
-        alert('Invalid GeoJSON');
-      }
-      setDrawerOpen(false);
-    }
-  }
-
-  const onExportToFile = async () => {
-    if (featuresSourceRef.current) {
-      const features = featuresSourceRef.current.getFeatures();
-      const text = new GeoJSON().writeFeatures(features);
-      await fileSave(new Blob([text], {type: 'application/json'}), {
-        fileName: 'map.json',
-        extensions: ['.json'],
-      });
-      setDrawerOpen(false);
-    }
-  }
+  const onExportAsImage = () => importExport.exportAsImage(() => setDrawerOpen(false));
+  const onImportFromFile = async () => importExport.importFromFile(noteId).then(() => setDrawerOpen(false));
+  const onExportToFile = async () => importExport.exportToFile(noteId).then(() => setDrawerOpen(false));
 
   return (
     <>

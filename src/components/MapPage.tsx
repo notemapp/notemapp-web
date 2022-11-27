@@ -5,16 +5,16 @@ import useMap from "../hooks/useMap";
 
 export default function MapPage() {
 
-  const noteId = useParams().noteId || "";
+  const noteId = useParams().noteId!;
 
   const {mapRef, sourcesRef, layersRef, popupRef} = useMap(noteId);
 
   return (
     <>
       <MapPageNavigation
+        noteId={noteId}
         mapRef={mapRef.mapRef}
         featuresSourceRef={sourcesRef.featuresSourceRef}
-        noteId={noteId}
       />
       <MapContainer
         noteId={noteId}
