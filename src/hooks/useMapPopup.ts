@@ -6,7 +6,7 @@ const useMapPopup = () => {
   const popupOverlayRef = useRef<Overlay>();
   const popupContentRef = useRef<HTMLDivElement>(null);
   const popupContainerRef = useRef<HTMLDivElement>(null);
-  const popupCloserRef = useRef<HTMLAnchorElement>(null);
+  const popupCloserRef = useRef<HTMLDivElement>(null);
 
   function initMapPopup(map: Map): void {
 

@@ -41,7 +41,7 @@ const useMapInteractions = (
     popupOverlayRef: MutableRefObject<Overlay|undefined>
     popupContainerRef: RefObject<HTMLDivElement>,
     popupContentRef: RefObject<HTMLDivElement>,
-    popupCloserRef: RefObject<HTMLAnchorElement>,
+    popupCloserRef: RefObject<HTMLDivElement>,
   }
 ) => {
 

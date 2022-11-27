@@ -43,7 +43,7 @@ export default function MapContainer(props: {
   }
   popupRef: {
     popupContainerRef: RefObject<HTMLDivElement>,
-    popupCloserRef: RefObject<HTMLAnchorElement>,
+    popupCloserRef: RefObject<HTMLDivElement>,
     popupContentRef: RefObject<HTMLDivElement>,
     popupOverlayRef: MutableRefObject<Overlay|undefined>,
   }
@@ -55,9 +55,6 @@ export default function MapContainer(props: {
 
   const mapRef = props.mapRef.mapRef;
   const mapContainerRef = props.mapRef.mapContainerRef;
-  const popupContainerRef = props.popupRef.popupContainerRef;
-  const popupCloserRef = props.popupRef.popupCloserRef;
-  const popupContentRef = props.popupRef.popupContentRef;
 
   const featuresSourceRef = props.sourcesRef.featuresSourceRef;
   const locationSourceRef = props.sourcesRef.locationSourceRef;

@@ -11,13 +11,7 @@ export default function AnnotationMarkerPopupContent(props: {
 
   // Since the popup is rendered through renderToString we can only define the markup here (no JS):
   return (
-    <>
-      <label
-        htmlFor={ID_MARKER_CONTENT}
-        className="font-medium text-gray-900"
-      >
-      Your annotation
-      </label>
+    <div>
       {
         isEditing &&
         <textarea
@@ -27,7 +21,7 @@ export default function AnnotationMarkerPopupContent(props: {
           border border-gray-300
           resize-none
         "
-          placeholder="Enter your annotation here"
+          placeholder="Write your note here, you can also use Markdown syntax!"
           rows={7}
         />
       }
@@ -49,7 +43,7 @@ export default function AnnotationMarkerPopupContent(props: {
           </button>
         </div>
       }
-    </>
+    </div>
   );
 
 }
