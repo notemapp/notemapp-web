@@ -48,11 +48,10 @@ export default function MapContainer(props: {
   const featuresSourceRef = props.sourcesRef.featuresSourceRef;
   const featuresLayerRef = props.layersRef.featuresLayerRef;
 
-  const {onGeolocate} = useMapGeolocation(mapRef, props.sourcesRef.locationSourceRef);
+  const {onGeolocation} = useMapGeolocation(mapRef, props.sourcesRef.locationSourceRef);
 
   const [currentLayer, setCurrentLayer] = useState<TileLayerType|undefined>(undefined);
 
-  // Interactions
   const {updateInteraction, undoRedoInteractionRef, selectedFeatureRef, selectedFeature, setSelectedFeature} =
     useMapInteractions(noteId, mapRef, featuresSourceRef, featuresLayerRef, props.popupRef);
   const interactionTypeRef = useRef<InteractionType>(InteractionType.None);
@@ -66,9 +65,6 @@ export default function MapContainer(props: {
     interactionTypeRef.current = type;
     updateInteraction(interactionTypeRef.current, isFreeHandRef.current);
   }
-
-
-
 
   const onDeleteFeature = () => {
     if (selectedFeatureRef.current) {
@@ -87,30 +83,27 @@ export default function MapContainer(props: {
     storage.updateFeatures(noteId, featuresSourceRef.current?.getFeatures() || []);
   }
 
-  useEffect(() =>
-    storage.fetchLastUsedLayer(noteId, (layer: TileLayerType) => setCurrentLayer(layer)), []);
+  useEffect(() => {
+    storage.fetchLastUsedLayer(noteId, (layer: TileLayerType) => setCurrentLayer(layer))
+  }, []);
 
   const onTileLayerToggle = (tileLayerType: TileLayerType) => {
+
     if (mapRef.current) {
       storage.updateLastUsedLayer(noteId, tileLayerType);
       mapRef.current.getLayerGroup().getLayers().forEach((layer) => {
         if (layer instanceof LayerGroup) {
-          layer.getLayers().forEach((l, i) => {
-            if (i === tileLayerType.valueOf()) {
-              l.setVisible(true);
-            } else {
-              l.setVisible(false);
-            }
-          });
+          layer.getLayers().forEach((l, i) => l.setVisible(i === tileLayerType.valueOf()));
         }
       });
       setCurrentLayer(tileLayerType);
     }
+
   }
 
   return (
     <div>
-      <div ref={mapContainerRef} className="w-screen h-screen -z-50"></div>
+      <div ref={mapContainerRef} className="w-screen h-screen -z-50" />
       <AnnotationMarkerPopup popupRef={props.popupRef} />
       <BottomToolbar
         interactionType={interactionTypeRef.current}
@@ -120,8 +113,8 @@ export default function MapContainer(props: {
         onUndo={onUndo}
         onRedo={onRedo}
       />
-      <SideToolbar onLocate={onGeolocate} onDeleteFeature={onDeleteFeature} selectedFeature={selectedFeature} />
-      <TileLayerToolbar onTileLayerToggle={onTileLayerToggle} currentLayer={currentLayer} />
+      <SideToolbar onLocate={onGeolocation} onDeleteFeature={onDeleteFeature} selectedFeature={selectedFeature} />
+      <TileLayerToolbar currentLayer={currentLayer} onTileLayerToggle={onTileLayerToggle} />
     </div>
   );
 

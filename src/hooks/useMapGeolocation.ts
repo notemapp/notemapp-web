@@ -50,7 +50,7 @@ const useMapGeolocation = (
 
   }
 
-  function onGeolocate(): void {
+  function onGeolocation(): void {
     locationFeatureRef.current && locationSourceRef.current?.addFeature(locationFeatureRef.current);
     initGeolocation();
   }
@@ -59,7 +59,7 @@ const useMapGeolocation = (
     initLocationFeature();
   }, []);
 
-  return {onGeolocate};
+  return {onGeolocation};
 
 };
 
