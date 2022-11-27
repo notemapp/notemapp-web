@@ -20,6 +20,8 @@ import AnnotationMarkerPopupContent, {
   ID_MARKER_BUTTON_CREATE,
   ID_MARKER_CONTENT
 } from "../components/AnnotationMarkerPopupContent";
+import {marked} from "marked";
+import DOMPurify from 'dompurify';
 
 export const MARKER_STYLE = new Style({
   image: new Icon({
@@ -83,7 +85,7 @@ const useMapInteractions = (
     const popupOverlayRef = popupRef!.popupOverlayRef;
 
     if (popupContentRef.current && popupOverlayRef.current) {
-      popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({markerContent: undefined, isEditing: true}));
+      popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({markerContent: '', isEditing: true}));
       window.document.getElementById(ID_MARKER_BUTTON_CREATE)?.addEventListener("click", () => {
         const input = window.document.getElementById(ID_MARKER_CONTENT) as HTMLInputElement;
         addAnnotationMarker(coordinates, input.value);
@@ -114,17 +116,7 @@ const useMapInteractions = (
     }
 
     if (interactionType === InteractionType.None) {
-      mapInteractionKeys.current?.push(mapRef.current.on('click', function (evt) {
-        const feature = mapRef.current?.forEachFeatureAtPixel(evt.pixel, function (feature) {
-          return feature;
-        });
-        popupOverlayRef.current?.setPosition(undefined);
-        if (!feature || !feature.get("content")) {
-          return;
-        }
-        popupOverlayRef.current?.setPosition(evt.coordinate);
-        if (popupContentRef.current) popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({markerContent: feature.get("content"), isEditing: false}));
-      }));
+      initAnnotationMarkerPopupInteraction(mapRef.current);
       return;
     }
 
@@ -186,6 +178,31 @@ const useMapInteractions = (
 
   }
 
+  function initAnnotationMarkerPopupInteraction(map: Map) {
+
+    mapInteractionKeys.current?.push(map.on('click', function (evt) {
+      const feature = mapRef.current?.forEachFeatureAtPixel(evt.pixel, function (feature) {
+        return feature;
+      });
+      popupRef.popupOverlayRef.current?.setPosition(undefined);
+      if (!feature || !feature.get("content")) {
+        return;
+      }
+      popupRef.popupOverlayRef.current?.setPosition(evt.coordinate);
+      if (popupRef.popupContentRef.current) {
+        let markerContentMarkdown = feature.get("content");
+        if (markerContentMarkdown) {
+          const renderedMarkerContent = DOMPurify.sanitize(marked.parse(markerContentMarkdown));
+          popupRef.popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({
+            markerContent: renderedMarkerContent,
+            isEditing: false
+          }));
+        }
+      }
+    }));
+
+  }
+
   function initUndoRedoInteraction(map: Map, layer: VectorLayer<VectorSource>): void {
 
     if (!undoRedoInteractionRef.current) {
@@ -200,6 +217,7 @@ const useMapInteractions = (
 
   useEffect(() => {
     if (mapRef.current) {
+      initAnnotationMarkerPopupInteraction(mapRef.current);
       initUndoRedoInteraction(mapRef.current, featuresLayerRef.current!);
     }
   }, [mapRef.current])

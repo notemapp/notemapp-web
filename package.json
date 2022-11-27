@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "browser-fs-access": "0.31.1",
+    "dompurify": "^2.4.1",
     "idb": "7.1.1",
     "idb-keyval": "6.2.0",
+    "marked": "^4.2.3",
     "ol": "7.1.0",
     "ol-ext": "4.0.3",
     "react": "18.2.0",
@@ -20,6 +22,8 @@
   },
   "devDependencies": {
     "@babel/core": "7.20.2",
+    "@types/dompurify": "^2.4.0",
+    "@types/marked": "^4.0.7",
     "@types/google-one-tap": "1.2.2",
     "@types/google.accounts": "0.0.2",
     "@types/node": "18.11.9",

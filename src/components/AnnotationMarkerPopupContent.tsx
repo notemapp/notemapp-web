@@ -2,12 +2,12 @@ export const ID_MARKER_BUTTON_CREATE = 'marker-button-create';
 export const ID_MARKER_CONTENT = 'marker-content';
 
 export default function AnnotationMarkerPopupContent(props: {
-  markerContent: string|undefined,
+  markerContent: string,
   isEditing: boolean
 }) {
 
   const isEditing = props.isEditing;
-  const markerContent = props.markerContent || "Enter your annotation here";
+  const markerContent = props.markerContent;
 
   // Since the popup is rendered through renderToString we can only define the markup here (no JS):
   return (
@@ -18,18 +18,26 @@ export default function AnnotationMarkerPopupContent(props: {
       >
       Your annotation
       </label>
-      <textarea
-        id={ID_MARKER_CONTENT}
-        className={`
+      {
+        isEditing &&
+        <textarea
+          id={ID_MARKER_CONTENT}
+          className="
           w-full mt-2 mb-1 p-2 text-sm text-gray-900 bg-gray-100 rounded-lg
           border border-gray-300
           resize-none
-          ${!isEditing ? 'placeholder-gray-900' : ''}
-        `}
-        placeholder={markerContent}
-        rows={7}
-        disabled={!isEditing}
-      />
+        "
+          placeholder="Enter your annotation here"
+          rows={7}
+        />
+      }
+      {
+        !isEditing &&
+        <div
+          className="w-full mt-2 mb-1 p-2"
+          dangerouslySetInnerHTML={{ __html: markerContent }}
+        />
+      }
       {
         props.isEditing &&
         <div className="w-full flex justify-end">
