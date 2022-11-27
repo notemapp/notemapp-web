@@ -83,7 +83,7 @@ const useMapInteractions = (
     const popupOverlayRef = popupRef!.popupOverlayRef;
 
     if (popupContentRef.current && popupOverlayRef.current) {
-      popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent());
+      popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({markerContent: undefined, isEditing: true}));
       window.document.getElementById(ID_MARKER_BUTTON_CREATE)?.addEventListener("click", () => {
         const input = window.document.getElementById(ID_MARKER_CONTENT) as HTMLInputElement;
         addAnnotationMarker(coordinates, input.value);
@@ -123,7 +123,7 @@ const useMapInteractions = (
           return;
         }
         popupOverlayRef.current?.setPosition(evt.coordinate);
-        if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("content")}</p>`;
+        if (popupContentRef.current) popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({markerContent: feature.get("content"), isEditing: false}));
       }));
       return;
     }
