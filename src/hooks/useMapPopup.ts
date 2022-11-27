@@ -1,15 +1,12 @@
 import {useEffect, useRef} from "react";
 import {Map, Overlay} from "ol";
-import {EventsKey} from "ol/events";
 
 const useMapPopup = () => {
 
   const popupOverlayRef = useRef<Overlay>();
-  const popupContentRef = useRef<HTMLDivElement>();
-  const popupContainerRef = useRef<HTMLDivElement>();
-  const popupCloserRef = useRef<HTMLAnchorElement>();
-
-  const mapInteractionKeys = useRef<EventsKey[]>([]);
+  const popupContentRef = useRef<HTMLDivElement>(null);
+  const popupContainerRef = useRef<HTMLDivElement>(null);
+  const popupCloserRef = useRef<HTMLAnchorElement>(null);
 
   function initMapPopup(map: Map): void {
 
@@ -26,19 +23,7 @@ const useMapPopup = () => {
 
     }
 
-    mapInteractionKeys.current.push(
-      map.on('click', function (evt) {
-        const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-          return feature;
-        });
-        popupOverlayRef.current?.setPosition(undefined);
-        if (!feature || !feature.get("label")) {
-          return;
-        }
-        popupOverlayRef.current?.setPosition(evt.coordinate);
-        if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("label")}</p>`;
-      })
-    );
+    map.addOverlay(popupOverlayRef.current);
 
   }
 
@@ -52,7 +37,7 @@ const useMapPopup = () => {
     }
   }, []);
 
-  return {popupOverlayRef, popupContainerRef, popupCloserRef, initMapPopup};
+  return {popupOverlayRef, popupContainerRef, popupContentRef, popupCloserRef, initMapPopup};
 
 };
 

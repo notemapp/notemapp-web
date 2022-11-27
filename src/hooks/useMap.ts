@@ -13,9 +13,9 @@ const useMap = (id: string) => {
   const storageContext = useContext(StorageContext);
 
   const mapRef = useRef<Map>();
-  const mapContainerRef = useRef<HTMLDivElement|undefined>(undefined);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  const {popupOverlayRef, popupContainerRef, popupCloserRef, initMapPopup} = useMapPopup();
+  const {popupOverlayRef, popupContainerRef, popupContentRef, popupCloserRef, initMapPopup} = useMapPopup();
 
   const {featuresSourceRef, locationSourceRef, initMapSources} = useMapSources(id);
   const {featuresLayerRef, locationLayerRef, tileLayerGroupRef, initMapLayers} = useMapLayers(id, featuresSourceRef, locationSourceRef);
@@ -35,12 +35,11 @@ const useMap = (id: string) => {
 
   function initMap() {
 
-    if (!mapRef.current) {
+    if (!mapRef.current && mapContainerRef.current) {
 
       mapRef.current = new Map({
         target: mapContainerRef.current,
         layers: [tileLayerGroupRef.current!, featuresLayerRef.current!, locationLayerRef.current!],
-        overlays: [popupOverlayRef.current!],
         view: new View({
           center: [-11000000, 4600000],
           zoom: 4,
@@ -76,7 +75,12 @@ const useMap = (id: string) => {
 
   }, []);
 
-  return {mapRef, popupRef: {popupContainerRef, popupCloserRef}};
+  return {
+    mapRef: {mapRef, mapContainerRef},
+    sourcesRef: {featuresSourceRef, locationSourceRef},
+    layersRef: {featuresLayerRef, locationLayerRef, tileLayerGroupRef},
+    popupRef: {popupContainerRef, popupContentRef, popupCloserRef, popupOverlayRef}
+  };
 
 };
 
