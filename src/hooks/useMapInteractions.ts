@@ -8,14 +8,22 @@ import {Feature, MapBrowserEvent, Overlay} from "ol";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
 import {unByKey} from "ol/Observable";
-import {Fill, Stroke, Style} from "ol/style";
+import {Fill, Icon, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import {DrawEvent} from "ol/interaction/Draw";
 import log from "../core/Logger";
-import {getStyleByFeatureType} from "../core/controller/FeatureStyleController";
 import {Point} from "ol/geom";
 import UndoRedo from "ol-ext/interaction/UndoRedo";
 import useStorage from "./useStorage";
+
+export const MARKER_STYLE = new Style({
+  image: new Icon({
+    anchor: [0, 0],
+    anchorXUnits: 'fraction',
+    anchorYUnits: 'pixels',
+    src: '/assets/icons/note.svg',
+  }),
+});
 
 const useMapInteractions = (
   id: string,
@@ -56,7 +64,7 @@ const useMapInteractions = (
     if (!featuresSourceRef.current) return;
 
     const markerFeature = new Feature({content: content});
-    markerFeature.setStyle(getStyleByFeatureType("Point"));
+    markerFeature.setStyle(MARKER_STYLE);
     markerFeature.setGeometry(new Point(coordinates));
     featuresSourceRef.current.addFeature(markerFeature);
 
