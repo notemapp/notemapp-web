@@ -16,7 +16,10 @@ import {Point} from "ol/geom";
 import UndoRedo from "ol-ext/interaction/UndoRedo";
 import useStorage from "./useStorage";
 import {renderToString} from "react-dom/server";
-import MarkerPopup from "../components/MarkerPopup";
+import AnnotationMarkerPopupContent, {
+  ID_MARKER_BUTTON_CREATE,
+  ID_MARKER_CONTENT
+} from "../components/AnnotationMarkerPopupContent";
 
 export const MARKER_STYLE = new Style({
   image: new Icon({
@@ -80,9 +83,9 @@ const useMapInteractions = (
     const popupOverlayRef = popupRef!.popupOverlayRef;
 
     if (popupContentRef.current && popupOverlayRef.current) {
-      popupContentRef.current.innerHTML = renderToString(MarkerPopup());
-      window.document.getElementById("marker-create")?.addEventListener("click", () => {
-        const input = window.document.getElementById("marker-content") as HTMLInputElement;
+      popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent());
+      window.document.getElementById(ID_MARKER_BUTTON_CREATE)?.addEventListener("click", () => {
+        const input = window.document.getElementById(ID_MARKER_CONTENT) as HTMLInputElement;
         addAnnotationMarker(coordinates, input.value);
         popupOverlayRef.current?.setPosition(undefined);
       });

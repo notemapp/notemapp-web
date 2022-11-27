@@ -8,7 +8,6 @@ import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
 import {InteractionType} from "../core/InteractionType";
 import log from "../core/Logger";
-import style from "./MapContainer.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
 import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
@@ -18,6 +17,7 @@ import TileLayerToolbar from "./TileLayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import useMapInteractions from "../hooks/useMapInteractions";
 import VectorLayer from "ol/layer/Vector";
+import AnnotationMarkerPopup from "./AnnotationMarkerPopup";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -162,11 +162,8 @@ export default function MapContainer(props: {
 
   return (
     <div>
-      <div ref={mapContainerRef} className={`${style.mapContainer} -z-50`}></div>
-      <div ref={popupContainerRef} className={style.olPopup}>
-        <a href="#" ref={popupCloserRef} className={style.olPopupCloser}></a>
-        <div ref={popupContentRef}></div>
-      </div>
+      <div ref={mapContainerRef} className={`w-screen h-screen -z-50`}></div>
+      <AnnotationMarkerPopup popupRef={props.popupRef} />
       <BottomToolbar
         interactionType={drawTypeRef.current}
         isFreeHand={freeHandRef.current}
