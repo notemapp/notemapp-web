@@ -1,4 +1,4 @@
-import {MutableRefObject, useContext, useState} from "react";
+import {MutableRefObject, useState} from "react";
 import Navbar from "./Navbar";
 import MapPageDrawer from "./MapPageDrawer";
 import {exportAsImage} from "../core/controller/MapController";
@@ -6,8 +6,7 @@ import {GeoJSON} from "ol/format";
 import Map from "ol/Map";
 import VectorSource from "ol/source/Vector";
 import {fileOpen, fileSave} from "browser-fs-access";
-import {updateLocalFeatures} from "../core/controller/MapInteractionController";
-import {StorageContext} from "./StorageContext";
+import useStorage from "../hooks/useStorage";
 
 export default function MapPageNavigation(props: {
   mapRef: MutableRefObject<Map|undefined>,
@@ -15,7 +14,7 @@ export default function MapPageNavigation(props: {
   noteId: string
 }) {
 
-  const storageContext = useContext(StorageContext);
+  const storage = useStorage();
   const noteId = props.noteId;
   const mapRef = props.mapRef;
   const featuresSourceRef = props.featuresSourceRef;
@@ -36,7 +35,7 @@ export default function MapPageNavigation(props: {
       try {
         const features = new GeoJSON().readFeatures(text);
         featuresSourceRef.current.addFeatures(features);
-        updateLocalFeatures(noteId, featuresSourceRef.current.getFeatures(), storageContext);
+        storage.saveFeatures(noteId, featuresSourceRef.current.getFeatures());
       } catch (e) {
         alert('Invalid GeoJSON');
       }
