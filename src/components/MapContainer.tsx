@@ -15,7 +15,6 @@ import style from "./MapContainer.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
 import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
-import {initSources} from "../core/controller/MapSourceController";
 import {initLayers} from "../core/controller/MapLayerController";
 import {initMap} from "../core/controller/MapController";
 import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
@@ -25,6 +24,7 @@ import TileLayerToolbar from "./TileLayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
+import useMapSources from "../hooks/useMapSources";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -51,8 +51,7 @@ export default function MapContainer(props: {
   const mapRef = props.mapRef;
 
   // Sources
-  const featuresSourceRef = props.featuresSourceRef;
-  const locationSourceRef = useRef<VectorSource>();
+  const {featuresSourceRef, locationSourceRef, initMapSources} = useMapSources(noteId);
 
   // Layers
   const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
@@ -130,8 +129,7 @@ export default function MapContainer(props: {
 
   useEffect(() => {
 
-    // @ts-ignore
-    initSources(noteId, storageContext, featuresSourceRef, locationSourceRef);
+    initMapSources();
     // @ts-ignore
     initLayers(noteId, featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef, storageContext);
 
