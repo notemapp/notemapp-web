@@ -1,16 +1,10 @@
 import {Feature} from "ol";
 import {Fill, Stroke, Style} from "ol/style";
-import CircleStyle from "ol/style/Circle";
 import {InteractionType, toGeometryFeature} from "../InteractionType";
+import {MARKER_STYLE} from "../../hooks/useMapInteractions";
 
 const STYLES = {
-  'Point': new Style({
-    image: new CircleStyle({
-      radius: 6,
-      fill: new Fill({color: '#d32f2f'}),
-      stroke: new Stroke({color: '#d32f2f', width: 2}),
-    })
-  }),
+  'Point': MARKER_STYLE,
   'LineString': new Style({
     stroke: new Stroke({
       color: 'green',

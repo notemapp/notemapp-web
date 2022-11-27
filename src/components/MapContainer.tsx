@@ -1,30 +1,23 @@
-import {MutableRefObject, useContext, useEffect, useRef, useState} from "react";
+import {MutableRefObject, RefObject, useContext, useEffect, useRef, useState} from "react";
 import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
 import {Feature, Geolocation, Overlay} from "ol";
 import Map from "ol/Map";
-import {Draw, Select} from "ol/interaction";
 import "ol/ol.css";
 import {get, set, update} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
 import {InteractionType} from "../core/InteractionType";
-import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import log from "../core/Logger";
-import style from "./MapContainer.module.css";
 import SideToolbar from "./SideToolbar";
 import {StorageContext} from "./StorageContext";
 import {initGeolocation, initLocationFeatureRef} from "../core/controller/GeolocationController";
-import {initSources} from "../core/controller/MapSourceController";
-import {initLayers} from "../core/controller/MapLayerController";
-import {initMap} from "../core/controller/MapController";
-import {initUndoInteraction, updateDrawInteraction} from "../core/controller/MapInteractionController";
 import {Note} from "../core/Note";
 import LayerGroup from "ol/layer/Group";
 import TileLayerToolbar from "./TileLayerToolbar";
 import {TileLayerType} from "../core/TileLayerType";
-import {EventsKey} from "ol/events";
-import {SelectEvent} from "ol/interaction/Select";
+import useMapInteractions from "../hooks/useMapInteractions";
+import VectorLayer from "ol/layer/Vector";
+import AnnotationMarkerPopup from "./AnnotationMarkerPopup";
 
 export const updateNoteMeta = (note: Note) => {
   return {
@@ -35,41 +28,48 @@ export const updateNoteMeta = (note: Note) => {
 
 export default function MapContainer(props: {
   noteId: string,
-  mapRef: MutableRefObject<Map|undefined>,
-  featuresSourceRef: MutableRefObject<VectorSource|undefined>,
+  mapRef: {
+    mapRef: MutableRefObject<Map | undefined>,
+    mapContainerRef: RefObject<HTMLDivElement>
+  },
+  sourcesRef: {
+    featuresSourceRef: MutableRefObject<VectorSource | undefined>,
+    locationSourceRef: MutableRefObject<VectorSource | undefined>
+  },
+  layersRef: {
+    featuresLayerRef: MutableRefObject<VectorLayer<VectorSource> | undefined>,
+    locationLayerRef: MutableRefObject<VectorLayer<VectorSource> | undefined>
+    tileLayerGroupRef: MutableRefObject<LayerGroup | undefined>
+  }
+  popupRef: {
+    popupContainerRef: RefObject<HTMLDivElement>,
+    popupCloserRef: RefObject<HTMLAnchorElement>,
+    popupContentRef: RefObject<HTMLDivElement>,
+    popupOverlayRef: MutableRefObject<Overlay|undefined>,
+  }
 }) {
 
   const noteId = props.noteId;
 
   const storageContext = useContext(StorageContext);
 
-  // Map
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const popupContainerRef = useRef<HTMLDivElement>(null);
-  const popupCloserRef = useRef<HTMLAnchorElement>(null);
-  const popupContentRef = useRef<HTMLDivElement>(null);
-  const mapRef = props.mapRef;
+  const mapRef = props.mapRef.mapRef;
+  const mapContainerRef = props.mapRef.mapContainerRef;
+  const popupContainerRef = props.popupRef.popupContainerRef;
+  const popupCloserRef = props.popupRef.popupCloserRef;
+  const popupContentRef = props.popupRef.popupContentRef;
 
-  // Sources
-  const featuresSourceRef = props.featuresSourceRef;
-  const locationSourceRef = useRef<VectorSource>();
-
-  // Layers
-  const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
-  const locationLayerRef = useRef<VectorLayer<VectorSource>>();
-  const tileLayerGroupRef = useRef<LayerGroup>();
-
-  // Overlays
-  const popupOverlayRef = useRef<Overlay>();
+  const featuresSourceRef = props.sourcesRef.featuresSourceRef;
+  const locationSourceRef = props.sourcesRef.locationSourceRef;
+  const featuresLayerRef = props.layersRef.featuresLayerRef;
 
   // Interactions
-  // @ts-ignore
-  const undoRedoInteractionRef = useRef<UndoRedo>();
-  const drawInteractionRef = useRef<Draw>();
-  const selectInteractionRef = useRef<Select>();
-  const mapInteractionKeys = useRef<EventsKey[]>([]);
-
-  const selectedFeatureRef = useRef<Feature>();
+  const {updateInteraction, selectedFeatureRef, undoRedoInteractionRef, selectedFeature, setSelectedFeature} = useMapInteractions(
+    noteId,
+    mapRef,
+    featuresSourceRef,
+    featuresLayerRef,
+    props.popupRef);
 
   // Geolocation
   const geolocationRef = useRef<Geolocation>();
@@ -78,29 +78,14 @@ export default function MapContainer(props: {
   const freeHandRef = useRef<boolean>(true);
   const [currentLayer, setCurrentLayer] = useState<TileLayerType|undefined>(undefined);
 
-  const [selectedFeature, setSelectedFeature] = useState<boolean>(false);
-  const onSelectedFeature = (event: SelectEvent) => {
-    if (event.selected.length > 0) {
-      selectedFeatureRef.current = event.selected[0];
-      setSelectedFeature(true);
-    } else {
-      selectedFeatureRef.current = undefined;
-      setSelectedFeature(false);
-    }
-  }
-
   const onFreeHandToggle = (isActive: boolean) => {
     freeHandRef.current = isActive;
     log("[UPDATE] FreeHand:", freeHandRef.current);
-    updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, featuresLayerRef, noteId, storageContext,
-        popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
+    updateInteraction(drawTypeRef.current, freeHandRef.current);
   }
   const onInteractionTypeChange = (type: InteractionType) => {
     drawTypeRef.current = type;
-    updateDrawInteraction(drawTypeRef.current, freeHandRef.current,
-      mapRef, drawInteractionRef, selectInteractionRef, featuresSourceRef, featuresLayerRef, noteId, storageContext,
-        popupContentRef, popupOverlayRef, mapInteractionKeys, selectedFeatureRef, onSelectedFeature);
+    updateInteraction(drawTypeRef.current, freeHandRef.current);
   }
   const updateNotesStore = () => {
     set(
@@ -120,42 +105,15 @@ export default function MapContainer(props: {
     }
   }
   const onUndo = () => {
-    undoRedoInteractionRef.current.undo();
+    undoRedoInteractionRef.current?.undo();
     updateNotesStore();
   }
   const onRedo = () => {
-    undoRedoInteractionRef.current.redo();
+    undoRedoInteractionRef.current?.redo();
     updateNotesStore();
   }
 
-  useEffect(() => {
-
-    // @ts-ignore
-    initSources(noteId, storageContext, featuresSourceRef, locationSourceRef);
-    // @ts-ignore
-    initLayers(noteId, featuresLayerRef, locationLayerRef, tileLayerGroupRef, featuresSourceRef, locationSourceRef, storageContext);
-
-    if (!popupOverlayRef.current) {
-      popupOverlayRef.current = new Overlay({
-        element: popupContainerRef.current || undefined,
-        autoPan: {
-          animation: {
-            duration: 250,
-          },
-        },
-      });
-    }
-
-    if (!mapRef.current
-      && mapContainerRef.current && featuresLayerRef.current && locationLayerRef.current && tileLayerGroupRef.current) {
-      initMap(mapRef, mapInteractionKeys, popupOverlayRef, popupContentRef, mapContainerRef, tileLayerGroupRef, featuresLayerRef, locationLayerRef, noteId, storageContext);
-    }
-
-    initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);
-
-    getInitialLayer();
-
-  }, []);
+  useEffect(() => getInitialLayer(), []);
 
   // Geolocation
   // -----------
@@ -202,23 +160,10 @@ export default function MapContainer(props: {
     }
   }
 
-  useEffect(() => {
-    if (popupContainerRef.current && popupCloserRef.current && popupContentRef.current) {
-      popupCloserRef.current.onclick = function () {
-        popupOverlayRef.current?.setPosition(undefined);
-        popupCloserRef.current?.blur();
-        return false;
-      };
-    }
-  }, []);
-
   return (
     <div>
-      <div ref={mapContainerRef} className={`${style.mapContainer} -z-50`}></div>
-      <div ref={popupContainerRef} className={style.olPopup}>
-        <a href="#" ref={popupCloserRef} className={style.olPopupCloser}></a>
-        <div ref={popupContentRef}></div>
-      </div>
+      <div ref={mapContainerRef} className={`w-screen h-screen -z-50`}></div>
+      <AnnotationMarkerPopup popupRef={props.popupRef} />
       <BottomToolbar
         interactionType={drawTypeRef.current}
         isFreeHand={freeHandRef.current}

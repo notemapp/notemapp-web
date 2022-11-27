@@ -1,25 +1,28 @@
-import {useRef} from "react";
 import {useParams} from "react-router-dom";
 import MapContainer from "./MapContainer";
-import Map from "ol/Map";
-import VectorSource from "ol/source/Vector";
 import MapPageNavigation from "./MapPageNavigation";
+import useMap from "../hooks/useMap";
 
 export default function MapPage() {
 
   const noteId = useParams().noteId || "";
 
-  const mapRef = useRef<Map>();
-  const featuresSourceRef = useRef<VectorSource>();
+  const {mapRef, sourcesRef, layersRef, popupRef} = useMap(noteId);
 
   return (
     <>
       <MapPageNavigation
-        mapRef={mapRef}
-        featuresSourceRef={featuresSourceRef}
+        mapRef={mapRef.mapRef}
+        featuresSourceRef={sourcesRef.featuresSourceRef}
         noteId={noteId}
       />
-      <MapContainer noteId={noteId} mapRef={mapRef} featuresSourceRef={featuresSourceRef} />
+      <MapContainer
+        noteId={noteId}
+        mapRef={mapRef}
+        sourcesRef={sourcesRef}
+        layersRef={layersRef}
+        popupRef={popupRef}
+      />
     </>
   );
 

@@ -9,27 +9,32 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "browser-fs-access": "^0.31.1",
-    "idb": "^7.1.1",
-    "idb-keyval": "^6.2.0",
+    "browser-fs-access": "0.31.1",
+    "dompurify": "^2.4.1",
+    "idb": "7.1.1",
+    "idb-keyval": "6.2.0",
+    "marked": "^4.2.3",
     "ol": "7.1.0",
     "ol-ext": "4.0.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "^6.4.3"
+    "react-router-dom": "6.4.3"
   },
   "devDependencies": {
     "@babel/core": "7.20.2",
-    "@types/google-one-tap": "^1.2.2",
-    "@types/google.accounts": "^0.0.2",
-    "@types/node": "^18.11.9",
+    "@types/dompurify": "^2.4.0",
+    "@types/marked": "^4.0.7",
+    "@types/google-one-tap": "1.2.2",
+    "@types/google.accounts": "0.0.2",
+    "@types/node": "18.11.9",
+    "@types/ol-ext": "npm:@siedlerchr/types-ol-ext@3.0.7",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
-    "@types/wicg-file-system-access": "^2020.9.5",
+    "@types/wicg-file-system-access": "2020.9.5",
     "@vitejs/plugin-react": "2.2.0",
-    "autoprefixer": "^10.4.13",
-    "postcss": "^8.4.19",
-    "tailwindcss": "^3.2.4",
+    "autoprefixer": "10.4.13",
+    "postcss": "8.4.19",
+    "tailwindcss": "3.2.4",
     "typescript": "4.6.4",
     "vite": "3.2.3"
   }

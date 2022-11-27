@@ -1,4 +1,3 @@
-import {get as getProjection} from "ol/proj";
 import Map from "ol/Map";
 import {Overlay, View} from "ol";
 import {MutableRefObject, RefObject} from "react";
@@ -6,7 +5,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import {get, update} from "idb-keyval";
 import log from "../Logger";
-import {StorageContextInterface} from "../../components/StorageContext";
+import {NotePrefs, StorageContextInterface} from "../../components/StorageContext";
 import LayerGroup from "ol/layer/Group";
 import {EventsKey} from "ol/events";
 import {fileSave} from "browser-fs-access";
@@ -28,9 +27,7 @@ function initMap(
 
     // Avoid panning too much
     // @ts-ignore
-    const extent = getProjection('EPSG:3857').getExtent().slice();
-    extent[0] += extent[0];
-    extent[2] += extent[2];
+    const extent = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 
     // Instantiate map
     mapRef.current = new Map({
@@ -51,7 +48,7 @@ function initMap(
         zoom: mapRef.current?.getView().getZoom(),
         rotation: mapRef.current?.getView().getRotation()
       };
-      update(noteId, (prevView) => {return {layer: 0, ...prevView, ...currentView}}, storageContext?.notePrefsStoreRef.current)
+      update(noteId, (prevView: NotePrefs|undefined) => {return {layer: 0, ...prevView, ...currentView} as NotePrefs}, storageContext?.notePrefsStoreRef.current)
         .then(() => log("[UPDATE] Save current view"));
     });
 
