@@ -15,6 +15,8 @@ import log from "../core/Logger";
 import {Point} from "ol/geom";
 import UndoRedo from "ol-ext/interaction/UndoRedo";
 import useStorage from "./useStorage";
+import {renderToString} from "react-dom/server";
+import MarkerPopup from "../components/MarkerPopup";
 
 export const MARKER_STYLE = new Style({
   image: new Icon({
@@ -72,25 +74,29 @@ const useMapInteractions = (
 
   }
 
+  function showAnnotationMarkerPopup(coordinates: number[]) {
+
+    const popupContentRef = popupRef!.popupContentRef;
+    const popupOverlayRef = popupRef!.popupOverlayRef;
+
+    if (popupContentRef.current && popupOverlayRef.current) {
+      popupContentRef.current.innerHTML = renderToString(MarkerPopup());
+      window.document.getElementById("marker-create")?.addEventListener("click", () => {
+        const input = window.document.getElementById("marker-content") as HTMLInputElement;
+        addAnnotationMarker(coordinates, input.value);
+        popupOverlayRef.current?.setPosition(undefined);
+      });
+      popupOverlayRef.current.setPosition(coordinates);
+    }
+
+  }
+
   function updateInteraction(interactionType: InteractionType, isFreeHand: boolean): void {
 
     if (!mapRef.current) return;
 
     const popupContentRef = popupRef!.popupContentRef;
     const popupOverlayRef = popupRef!.popupOverlayRef;
-
-    function showPopup(event: MapBrowserEvent<UIEvent>) {
-      const coordinate = event.coordinate;
-      if (popupContentRef.current && popupOverlayRef.current) {
-        popupContentRef.current.innerHTML = '<input id="popup-label" class="my-1 border border-1 border-black px-2 py-1" type="text"/><button id="popup-button" class="my-1 px-2 py-1 border border-1 border-black hover:bg-gray-300">Add</button>';
-        popupOverlayRef.current.setPosition(coordinate);
-        window.document.getElementById("popup-button")?.addEventListener("click", () => {
-          const input = window.document.getElementById("popup-label") as HTMLInputElement;
-          addAnnotationMarker(coordinate, input.value);
-          popupOverlayRef.current?.setPosition(undefined);
-        });
-      }
-    }
 
     if (mapInteractionKeys.current) {
       mapInteractionKeys.current.forEach(key => unByKey(key));
@@ -150,7 +156,7 @@ const useMapInteractions = (
     }
 
     if (interactionType === InteractionType.Marker) {
-      mapInteractionKeys.current?.push(mapRef.current.on('singleclick', showPopup));
+      mapInteractionKeys.current?.push(mapRef.current.on('singleclick', (event: MapBrowserEvent<UIEvent>) => showAnnotationMarkerPopup(event.coordinate)));
       return;
     }
 
