@@ -1,5 +1,5 @@
 import {MutableRefObject, useState} from "react";
-import Navbar from "./Navbar";
+import MapPageNavbar from "./MapPageNavbar";
 import MapPageDrawer from "./MapPageDrawer";
 import Map from "ol/Map";
 import VectorSource from "ol/source/Vector";
@@ -25,7 +25,7 @@ export default function MapPageNavigation(props: {
 
   return (
     <>
-      <Navbar onOpenDrawer={() => setDrawerOpen(true)} />
+      <MapPageNavbar onOpenDrawer={() => setDrawerOpen(true)} />
       <MapPageDrawer
         isOpen={isDrawerOpen}
         onClose={() => setDrawerOpen(false)}

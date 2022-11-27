@@ -15,7 +15,7 @@ export default function SideToolbar(props: {
   const buttonClass = tracking ? "bg-blue-500" : "text-black";
 
   return (
-    <div className="absolute top-12 right-0 w-12 h-auto bg-white rounded">
+    <div className="absolute top-20 right-0 w-12 h-auto bg-white rounded">
       <div className="w-full h-full flex justify-between py-0 grid grid-cols-1">
         <button className={"rounded w-full h-12 flex justify-center items-center group relative " + buttonClass} onClick={onLocate}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
