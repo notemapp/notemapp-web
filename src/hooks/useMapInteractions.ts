@@ -1,5 +1,5 @@
 import {InteractionType, toGeometryFeature} from "../core/InteractionType";
-import {MutableRefObject, RefObject, useContext, useRef, useState} from "react";
+import {MutableRefObject, RefObject, useContext, useEffect, useRef, useState} from "react";
 import Map from "ol/Map";
 import {Draw, Select} from "ol/interaction";
 import VectorSource from "ol/source/Vector";
@@ -18,6 +18,7 @@ import log from "../core/Logger";
 import {getStyleByFeatureType} from "../core/controller/FeatureStyleController";
 import {Point} from "ol/geom";
 import {GeoJSON} from "ol/format";
+import UndoRedo from "ol-ext/interaction/UndoRedo";
 
 const useMapInteractions = (
   id: string,
@@ -36,6 +37,8 @@ const useMapInteractions = (
 
   const drawInteractionRef = useRef<Draw>();
   const selectInteractionRef = useRef<Select>();
+  // @ts-ignore
+  const undoRedoInteractionRef = useRef<UndoRedo>();
 
   const mapInteractionKeys = useRef<EventsKey[]>([]);
 
@@ -179,7 +182,25 @@ const useMapInteractions = (
 
   }
 
-  return {updateInteraction, selectedFeatureRef, selectedFeature, setSelectedFeature};
+  function initUndoRedoInteraction(map: Map, layer: VectorLayer<VectorSource>): void {
+
+    if (!undoRedoInteractionRef.current) {
+      undoRedoInteractionRef.current = new UndoRedo({
+        maxLength: 20,
+        layers: [layer],
+      });
+      map.addInteraction(undoRedoInteractionRef.current);
+    }
+
+  }
+
+  useEffect(() => {
+    if (mapRef.current) {
+      initUndoRedoInteraction(mapRef.current, featuresLayerRef.current!);
+    }
+  }, [mapRef.current])
+
+  return {updateInteraction, undoRedoInteractionRef, selectedFeatureRef, selectedFeature, setSelectedFeature};
 
 };
 

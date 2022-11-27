@@ -7,7 +7,6 @@ import {get, set, update} from 'idb-keyval';
 import {GeoJSON} from "ol/format";
 import {BottomToolbar} from "./BottomToolbar";
 import {InteractionType} from "../core/InteractionType";
-import UndoRedo from 'ol-ext/interaction/UndoRedo';
 import log from "../core/Logger";
 import style from "./MapContainer.module.css";
 import SideToolbar from "./SideToolbar";
@@ -65,9 +64,7 @@ export default function MapContainer(props: {
   const featuresLayerRef = props.layersRef.featuresLayerRef;
 
   // Interactions
-  // @ts-ignore
-  const undoRedoInteractionRef = useRef<UndoRedo>();
-  const {updateInteraction, selectedFeatureRef, selectedFeature, setSelectedFeature} = useMapInteractions(
+  const {updateInteraction, selectedFeatureRef, undoRedoInteractionRef, selectedFeature, setSelectedFeature} = useMapInteractions(
     noteId,
     mapRef,
     featuresSourceRef,
@@ -116,19 +113,7 @@ export default function MapContainer(props: {
     updateNotesStore();
   }
 
-  useEffect(() => {
-
-    if (mapRef.current) {
-
-      // TODO: refactor undo interaction
-      //initUndoInteraction(undoRedoInteractionRef, mapRef, featuresLayerRef);
-
-      // TODO: refactor featch initial layer
-      //getInitialLayer();
-
-    }
-
-  }, []);
+  useEffect(() => getInitialLayer(), []);
 
   // Geolocation
   // -----------
