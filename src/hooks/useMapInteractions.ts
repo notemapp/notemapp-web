@@ -1,10 +1,9 @@
 import {InteractionType, toGeometryFeature} from "../core/InteractionType";
-import {MutableRefObject, RefObject, useContext, useEffect, useRef, useState} from "react";
+import {MutableRefObject, RefObject, useEffect, useRef, useState} from "react";
 import Map from "ol/Map";
 import {Draw, Select} from "ol/interaction";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import {StorageContext} from "../components/StorageContext";
 import {Feature, MapBrowserEvent, Overlay} from "ol";
 import {EventsKey} from "ol/events";
 import {SelectEvent} from "ol/interaction/Select";
@@ -12,13 +11,11 @@ import {unByKey} from "ol/Observable";
 import {Fill, Stroke, Style} from "ol/style";
 import CircleStyle from "ol/style/Circle";
 import {DrawEvent} from "ol/interaction/Draw";
-import {set, update} from "idb-keyval";
-import {updateNoteMeta} from "../components/MapContainer";
 import log from "../core/Logger";
 import {getStyleByFeatureType} from "../core/controller/FeatureStyleController";
 import {Point} from "ol/geom";
-import {GeoJSON} from "ol/format";
 import UndoRedo from "ol-ext/interaction/UndoRedo";
+import useStorage from "./useStorage";
 
 const useMapInteractions = (
   id: string,
@@ -33,19 +30,18 @@ const useMapInteractions = (
   }
 ) => {
 
-  const storageContext = useContext(StorageContext);
+  const storage = useStorage();
 
   const drawInteractionRef = useRef<Draw>();
   const selectInteractionRef = useRef<Select>();
-  // @ts-ignore
   const undoRedoInteractionRef = useRef<UndoRedo>();
 
   const mapInteractionKeys = useRef<EventsKey[]>([]);
 
   const selectedFeatureRef = useRef<Feature>();
-
   const [selectedFeature, setSelectedFeature] = useState<boolean>(false);
-  const onSelectedFeature = (event: SelectEvent) => {
+
+  function onFeatureSelect(event: SelectEvent) {
     if (event.selected.length > 0) {
       selectedFeatureRef.current = event.selected[0];
       setSelectedFeature(true);
@@ -55,23 +51,16 @@ const useMapInteractions = (
     }
   }
 
-  function updateLocalFeatures(features: Array<Feature>) {
-    set(id, new GeoJSON().writeFeatures(features), storageContext?.noteStoreRef.current)
-      .then(() => log("[UPDATE] Add new feature"));
-  }
-
-  function addMarker(coordinates: number[], label: string|null|undefined): void {
+  function addAnnotationMarker(coordinates: number[], content: string|null|undefined): void {
 
     if (!featuresSourceRef.current) return;
 
-    const markerFeature = new Feature({
-      label: label,
-    });
+    const markerFeature = new Feature({content: content});
     markerFeature.setStyle(getStyleByFeatureType("Point"));
-    markerFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
+    markerFeature.setGeometry(new Point(coordinates));
     featuresSourceRef.current.addFeature(markerFeature);
 
-    updateLocalFeatures(featuresSourceRef.current.getFeatures());
+    storage.saveFeatures(id, featuresSourceRef.current.getFeatures());
 
   }
 
@@ -80,7 +69,6 @@ const useMapInteractions = (
     if (!mapRef.current) return;
 
     const popupContentRef = popupRef!.popupContentRef;
-    const popupCloserRef = popupRef!.popupCloserRef;
     const popupOverlayRef = popupRef!.popupOverlayRef;
 
     function showPopup(event: MapBrowserEvent<UIEvent>) {
@@ -90,7 +78,7 @@ const useMapInteractions = (
         popupOverlayRef.current.setPosition(coordinate);
         window.document.getElementById("popup-button")?.addEventListener("click", () => {
           const input = window.document.getElementById("popup-label") as HTMLInputElement;
-          addMarker(coordinate, input.value);
+          addAnnotationMarker(coordinate, input.value);
           popupOverlayRef.current?.setPosition(undefined);
         });
       }
@@ -114,11 +102,11 @@ const useMapInteractions = (
           return feature;
         });
         popupOverlayRef.current?.setPosition(undefined);
-        if (!feature || !feature.get("label")) {
+        if (!feature || !feature.get("content")) {
           return;
         }
         popupOverlayRef.current?.setPosition(evt.coordinate);
-        if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("label")}</p>`;
+        if (popupContentRef.current) popupContentRef.current.innerHTML = `<p>${feature?.get("content")}</p>`;
       }));
       return;
     }
@@ -148,7 +136,7 @@ const useMapInteractions = (
       selectInteractionRef.current?.setHitTolerance(10);
       mapRef.current?.addInteraction(selectInteractionRef.current);
       selectInteractionRef.current?.on('select', function (e) {
-        onSelectedFeature(e);
+        onFeatureSelect(e);
       });
       return;
     }
@@ -173,9 +161,8 @@ const useMapInteractions = (
     drawInteractionRef.current.on('drawend', (event: DrawEvent) => {
       let features = featuresSourceRef.current?.getFeatures() || [];
       features = features.concat(event.feature); // Source is not updated yet, add the new feature manually
-      updateLocalFeatures(features);
-      update(id, (note) => updateNoteMeta(note), storageContext?.noteMetaStoreRef.current)
-        .then(() => log("[UPDATE] Updated note modifiedOn"));
+      storage.saveFeatures(id, features);
+      storage.updateModifiedOn(id);
     });
 
     log('[UPDATE] Change drawType:', interactionType);

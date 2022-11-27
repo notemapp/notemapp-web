@@ -105,11 +105,11 @@ export default function MapContainer(props: {
     }
   }
   const onUndo = () => {
-    undoRedoInteractionRef.current.undo();
+    undoRedoInteractionRef.current?.undo();
     updateNotesStore();
   }
   const onRedo = () => {
-    undoRedoInteractionRef.current.redo();
+    undoRedoInteractionRef.current?.redo();
     updateNotesStore();
   }
 

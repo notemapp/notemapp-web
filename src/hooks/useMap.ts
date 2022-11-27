@@ -18,11 +18,13 @@ const useMap = (id: string) => {
   const {popupOverlayRef, popupContainerRef, popupContentRef, popupCloserRef, initMapPopup} = useMapPopup();
 
   const {featuresSourceRef, locationSourceRef, initMapSources} = useMapSources(id);
-  const {featuresLayerRef, locationLayerRef, tileLayerGroupRef, initMapLayers} = useMapLayers(id, featuresSourceRef, locationSourceRef);
+  const {featuresLayerRef, locationLayerRef, tileLayerGroupRef, initMapLayers} =
+    useMapLayers(id, featuresSourceRef, locationSourceRef);
 
+  // Limit map panning to this extent:
   const EXTENT = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 
-  function updatePrefs(map: Map, prevPrefs: NotePrefs|undefined): NotePrefs {
+  function updatePrefsWithCurrentView(map: Map, prevPrefs: NotePrefs|undefined): NotePrefs {
     return  {
       ...prevPrefs,
       ...{
@@ -49,15 +51,16 @@ const useMap = (id: string) => {
       });
 
       mapRef.current.on('moveend', () => {
-        update(id, (prevPrefs: NotePrefs|undefined) => updatePrefs(mapRef.current!, prevPrefs), storageContext?.notePrefsStoreRef.current)
-          .then(() => log("[UPDATE] Save current view"));
+        update(id, (prevPrefs: NotePrefs|undefined) =>
+          updatePrefsWithCurrentView(mapRef.current!, prevPrefs), storageContext?.notePrefsStoreRef.current)
+          .then(() => log("[UPDATE] Save current view into store"));
       });
 
       get(id, storageContext?.notePrefsStoreRef.current).then((prefs: NotePrefs) => {
         if (prefs) {
           mapRef.current!.getView().setCenter(prefs.center);
           mapRef.current!.getView().setZoom(prefs.zoom);
-          mapRef.current!.getView().setRotation(prefs.rotation||0);
+          mapRef.current!.getView().setRotation(prefs.rotation || 0);
           log("[INIT] Restored previous view from store");
         }
       });
