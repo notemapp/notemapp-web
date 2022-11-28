@@ -20,8 +20,7 @@ import AnnotationMarkerPopupContent, {
   ID_MARKER_BUTTON_CREATE,
   ID_MARKER_CONTENT
 } from "../components/AnnotationMarkerPopupContent";
-import {marked} from "marked";
-import DOMPurify from 'dompurify';
+import useMarkdownRenderer from "./useMarkdownRenderer";
 
 export const MARKER_STYLE = new Style({
   image: new Icon({
@@ -100,9 +99,6 @@ const useMapInteractions = (
 
     if (!mapRef.current) return;
 
-    const popupContentRef = popupRef!.popupContentRef;
-    const popupOverlayRef = popupRef!.popupOverlayRef;
-
     if (mapInteractionKeys.current) {
       mapInteractionKeys.current.forEach(key => unByKey(key));
       mapInteractionKeys.current = [];
@@ -178,6 +174,8 @@ const useMapInteractions = (
 
   }
 
+  const markdownRenderer = useMarkdownRenderer();
+
   function initAnnotationMarkerPopupInteraction(map: Map) {
 
     mapInteractionKeys.current?.push(map.on('click', function (evt) {
@@ -192,7 +190,7 @@ const useMapInteractions = (
       if (popupRef.popupContentRef.current) {
         let markerContentMarkdown = feature.get("content");
         if (markerContentMarkdown) {
-          const renderedMarkerContent = DOMPurify.sanitize(marked.parse(markerContentMarkdown));
+          const renderedMarkerContent = markdownRenderer.render(markerContentMarkdown);
           popupRef.popupContentRef.current.innerHTML = renderToString(AnnotationMarkerPopupContent({
             content: renderedMarkerContent,
             isEditing: false
