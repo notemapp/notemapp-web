@@ -25,7 +25,8 @@ export const StorageContextProvider = (props: {children: ReactNode}) => {
   const notePrefsStoreRef = useRef<UseStore>();
   const noteMetaStoreRef = useRef<UseStore>();
 
-  // We are using useLayoutEffect to trigger the creation of the stores before the children useEffect are called
+  // We are using useLayoutEffect to trigger the creation of the stores before the useEffects in the children components
+  // are called:
   useLayoutEffect(() => {
     if (!noteStoreRef.current)
       noteStoreRef.current = createStore(DB_NOTES, STORE_NOTES);
@@ -36,7 +37,9 @@ export const StorageContextProvider = (props: {children: ReactNode}) => {
   }, []);
 
   return (
-    <StorageContext.Provider value={{noteStoreRef: noteStoreRef, notePrefsStoreRef: notePrefsStoreRef, noteMetaStoreRef: noteMetaStoreRef}}>
+    <StorageContext.Provider
+      value={{noteStoreRef: noteStoreRef, notePrefsStoreRef: notePrefsStoreRef, noteMetaStoreRef: noteMetaStoreRef}}
+    >
       {props.children}
     </StorageContext.Provider>
   );

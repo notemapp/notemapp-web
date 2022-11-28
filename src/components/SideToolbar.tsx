@@ -6,36 +6,40 @@ export default function SideToolbar(props: {
   selectedFeature: boolean
 }) {
 
-  const [tracking, setTracking] = useState<boolean>(false);
+  const [isTracking, setIsTracking] = useState<boolean>(false);
   const onLocate = () => {
     props.onLocate();
-    setTracking(true);
-  }
-
-  const buttonClass = tracking ? "bg-blue-500" : "text-black";
+    setIsTracking(true);
+  };
 
   return (
-    <div className="absolute top-20 right-0 w-12 h-auto bg-white rounded">
+    <div className="w-12 h-auto absolute top-20 right-4 bg-none">
       <div className="w-full h-full flex justify-between py-0 grid grid-cols-1">
-        <button className={"rounded w-full h-12 flex justify-center items-center group relative " + buttonClass} onClick={onLocate}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-               stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-            <path strokeLinecap="round" strokeLinejoin="round"
-                  d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+        <button
+          className="
+            w-12 h-12 rounded flex justify-center items-center group relative bg-gray-100 hover:bg-gray-300
+            shadow drop-shadow-lg
+          "
+          onClick={onLocate}
+        >
+          <svg className={`w-6 h-6 ${isTracking ? 'text-blue-600' : 'text-black'}`} strokeWidth="1.5"
+               viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 19a7 7 0 100-14 7 7 0 000 14zM12 19v2M5 12H3M12 5V3M19 12h2" stroke="currentColor"
+                  strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="w-auto absolute hidden group-hover:flex left-0 -translate-x-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Locate</span>
         </button>
-        { props.selectedFeature &&
-          <button className="rounded w-full h-12 flex justify-center items-center group relative text-black"
-                  onClick={props.onDeleteFeature}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-                 stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+        {
+          props.selectedFeature &&
+          <button
+            className="
+              w-12 h-12 rounded flex justify-center items-center group relative bg-gray-100 hover:bg-gray-300
+              shadow drop-shadow-lg mt-2 animate-pulse
+            "
+            onClick={props.onDeleteFeature}
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" strokeWidth="1.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 9l-1.995 11.346A2 2 0 0116.035 22h-8.07a2 2 0 01-1.97-1.654L4 9M21 6h-5.625M3 6h5.625m0 0V4a2 2 0 012-2h2.75a2 2 0 012 2v2m-6.75 0h6.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
             </svg>
-            <span
-                className="w-auto absolute hidden group-hover:flex left-0 -translate-x-full px-2 py-2 bg-gray-600 rounded-lg text-center text-white text-sm">Delete selected</span>
           </button>
         }
       </div>

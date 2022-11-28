@@ -5,18 +5,11 @@ import {del, entries, set} from "idb-keyval";
 import {useNavigate} from "react-router-dom";
 import log from "../core/Logger";
 import {syncLocalNote, syncLocalNotes, syncRemoteNotes} from "../core/controller/GoogleDriveController";
-import {GoogleDrive} from "../hooks/useGoogleDrive";
+import useGoogle from "../hooks/useGoogle";
 
-export default function NotesPage(props: {
-  google: {
-    requestAuth: () => void,
-    isSignedIn: boolean,
-    signOut: () => void,
-    googleDrive: GoogleDrive
-  }
-}) {
+export default function HomePage() {
 
-  const {requestAuth, isSignedIn, signOut, googleDrive} = props.google;
+  const {requestAuth, isSignedIn, signOut, googleDrive} = useGoogle();
   const {deleteFileByName} = googleDrive;
 
   const onSignIn = () => {
@@ -31,7 +24,7 @@ export default function NotesPage(props: {
   const titleRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [_, setIsSyncing] = useState(false);
 
   useEffect(() => {
     entries(storageContext?.noteMetaStoreRef.current).then((entries) => {
