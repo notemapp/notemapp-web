@@ -155,7 +155,10 @@ export default function HomePageContainer() {
             {
               notes.length > 0 && (
                 notes.map((note) => (
-                  <div className="bg-gray-100 p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto">
+                  <div
+                    onClick={() => navigate(`/map/${note.id}`)}
+                    className="bg-gray-100 p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto hover:bg-gray-200"
+                  >
                     <div className="flex justify-between">
                       <div className="w-auto flex space-x-2 justify-start">
                         <span className="font-semibold text-lg text-ellipsis overflow-hidden max-w-2xl">{note.title}</span>
