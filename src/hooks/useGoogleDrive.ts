@@ -1,13 +1,11 @@
+import {Token} from "./useGoogle";
+
 interface GoogleDriveFile {
   id: string;
   name: string;
   mimeType: string;
   kind: string;
   appProperties: any;
-}
-
-interface GoogleDriveError {
-  message: string;
 }
 
 interface GoogleDriveFileMeta {
@@ -31,7 +29,7 @@ export interface GoogleDrive {
   getFilesInAppDataFolder: () => Promise<GoogleDriveFile[]>;
 }
 
-const useGoogleDrive = (getToken: () => Promise<string>) => {
+const useGoogleDrive = (getToken: () => Promise<Token>) => {
 
   async function getFilesInAppDataFolder(): Promise<GoogleDriveFile[]> {
 
@@ -40,7 +38,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const token = await getToken();
       const response = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files`, {
         method: "GET",
-        headers: new Headers({Authorization: `Bearer ${token}`}),
+        headers: new Headers({Authorization: `Bearer ${token.value}`}),
       });
       const json = await response.json();
 
@@ -64,7 +62,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const token = await getToken();
       const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${fileName}'&spaces=appDataFolder`, {
         method: "GET",
-        headers: new Headers({Authorization: `Bearer ${token}`}),
+        headers: new Headers({Authorization: `Bearer ${token.value}`}),
       });
       const json = await response.json();
       return json.files as GoogleDriveFile[];
@@ -91,7 +89,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const token = await getToken();
       const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
         method: "GET",
-        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        headers: new Headers({ Authorization: `Bearer ${token.value}` }),
       });
       return await response.text();
     } catch (error) {
@@ -107,7 +105,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const token = await getToken();
       const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,createdTime,modifiedTime,appProperties`, {
         method: "GET",
-        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        headers: new Headers({ Authorization: `Bearer ${token.value}` }),
       });
       const json = await response.json();
       return {
@@ -132,7 +130,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       const token = await getToken();
       await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: "DELETE",
-        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        headers: new Headers({ Authorization: `Bearer ${token.value}` }),
       });
     } catch (error) {
       console.log(error);
@@ -179,7 +177,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       form.append("file", content);
       const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true", {
         method: "POST",
-        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        headers: new Headers({ Authorization: `Bearer ${token.value}` }),
         body: form,
       });
       const json = await response.json();
@@ -216,7 +214,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       form.append("file", content);
       const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&supportsAllDrives=true`, {
         method: "PATCH",
-        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        headers: new Headers({ Authorization: `Bearer ${token.value}` }),
         body: form,
       });
       const json = await response.json();
@@ -251,7 +249,7 @@ const useGoogleDrive = (getToken: () => Promise<string>) => {
       form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
       const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: "PATCH",
-        headers: new Headers({ Authorization: `Bearer ${token}` }),
+        headers: new Headers({ Authorization: `Bearer ${token.value}` }),
         body: form,
       });
       const json = await response.json();

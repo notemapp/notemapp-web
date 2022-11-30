@@ -11,12 +11,12 @@ import HomePageNavigation from "./HomePageNavigation";
 
 export default function HomePageContainer() {
 
-  const {requestAuth, isSignedIn, signOut, googleDrive} = useGoogle();
+  const {signIn, signOut, isSignedIn, googleDrive} = useGoogle();
   const {deleteFileByName} = googleDrive;
 
   const onSignIn = () => {
     localStorage.setItem('hasPreviouslySignedIn', 'yep');
-    requestAuth();
+    signIn();
   }
 
   const storageContext = useContext(StorageContext);
@@ -156,6 +156,7 @@ export default function HomePageContainer() {
               notes.length > 0 && (
                 notes.map((note) => (
                   <div
+                    key={note.id}
                     onClick={() => navigate(`/map/${note.id}`)}
                     className="bg-gray-100 p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto hover:bg-gray-200"
                   >

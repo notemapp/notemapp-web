@@ -1,7 +1,13 @@
 import {useEffect, useState} from "react";
 import log from "../core/Logger";
 import useGoogleDrive, {GoogleDrive} from "./useGoogleDrive";
-import TokenClient = google.accounts.oauth2.TokenClient;
+
+export interface Token {
+  value: string;
+  expiration: number
+}
+
+const GOOGLE_SIGN_IN_TOKEN = 'googleSignInToken';
 
 const useGoogle = () => {
 
@@ -9,84 +15,71 @@ const useGoogle = () => {
     'https://www.googleapis.com/auth/drive.appdata',
     'https://www.googleapis.com/auth/drive.file'
   ];
-  const [client, setClient] = useState<TokenClient|null>(null);
-  const [token, setToken] = useState<string|null>(null);
-  const [tokenExpiration, setTokenExpiration] = useState<number|null>(null);
-  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+
+  const [client, setClient] = useState<google.accounts.oauth2.TokenClient|null>(null);
+  const [token, setToken] = useState<Token|null>(null);
+
+  const [isSignedIn, setSignedIn] = useState<boolean>(false);
 
   const googleDrive: GoogleDrive = useGoogleDrive(getToken);
 
-  function setLogout() {
-    setIsSignedIn(false);
+  function revokeSignIn() {
+    setSignedIn(false);
     setToken(null);
-    setTokenExpiration(null);
-    localStorage.removeItem('googleTokenValue');
-    localStorage.removeItem('googleTokenExpiration');
+    localStorage.removeItem(GOOGLE_SIGN_IN_TOKEN);
   }
 
-  async function getToken(): Promise<string> {
-
-    try {
-      if (isSignedIn && token) {
-        return Promise.resolve(token);
-      } else {
-        // Workaround :(
-        requestAuth();
-        return new Promise<string>((resolve) => {
-          const interval = setInterval(() => {
-            if (token) {
-              clearInterval(interval);
-              resolve(token);
-            }
-          }, 100);
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      throw error;
+  async function getToken(): Promise<Token> {
+    if (isSignedIn && token) {
+      return Promise.resolve(token);
+    } else {
+      requestSignIn();
+      return new Promise<Token>((resolve) => {
+        const interval = setInterval(() => {
+          // Wait for the token to be fetched:
+          if (token) {
+            clearInterval(interval);
+            resolve(token);
+          }
+        }, 100);
+      });
     }
-
   }
 
-  function requestAuth() {
+  function requestSignIn() {
 
-    // retrieve token from local storage
-    const token = localStorage.getItem('googleTokenValue');
-    const tokenExpiration = localStorage.getItem('googleTokenExpiration');
+    let token: Token|null = null;
+    const tokenFromLocalStorage: string|null = localStorage.getItem(GOOGLE_SIGN_IN_TOKEN);
 
-    let usingLocalStorage = false;
-    if (token && tokenExpiration) {
-      if (Date.now() < Number(tokenExpiration)) {
-        console.log("[TOKEN] Token is still valid, using it");
+    if (tokenFromLocalStorage) {
+      const parsedToken = JSON.parse(tokenFromLocalStorage) as Token;
+      const parsedTokenExpiration = Number(parsedToken.expiration);
+      if (Date.now() < parsedTokenExpiration) {
+        token = {
+          value: parsedToken.value,
+          expiration: parsedTokenExpiration
+        };
         setToken(token);
-        setTokenExpiration(Number(tokenExpiration));
-        usingLocalStorage = true;
+        log("Using token from local storage");
       } else {
-        console.log("[INFO] Local storage token expired");
-        localStorage.removeItem('googleTokenValue');
-        localStorage.removeItem('googleTokenExpiration');
+        log("Token in local storage has expired");
       }
-    } else {
-      console.log("[INFO] Local storage token not found");
     }
 
-    if (client && !usingLocalStorage) {
-      console.log("[INFO] Requesting auth", isSignedIn);
+    if (client && !token) {
+      log("Requesting new access token");
       client.requestAccessToken();
-    } else {
-      log("[ERROR] Google client not ready");
     }
 
+  }
+
+  function signIn() {
+    requestSignIn();
   }
 
   function signOut() {
     if (client && token) {
-      google.accounts.oauth2.revoke(token, () => {
-        setLogout();
-        log("[INFO] Google sign out");
-      });
-    } else {
-      log("[ERROR] Google client not ready");
+      google.accounts.oauth2.revoke(token.value, () => revokeSignIn());
     }
   }
 
@@ -99,24 +92,21 @@ const useGoogle = () => {
         scope: SCOPES.join(' '),
         prompt: '',
         callback: (response: any) => {
-          log("[INFO] Google auth response:", response);
           if (response && response.access_token) {
             if (google.accounts.oauth2.hasGrantedAllScopes(response, SCOPES[0], ...SCOPES.slice(1))) {
-              setToken(response.access_token);
-              let expiration = new Date().getTime() + response.expires_in * 1000;
-              setTokenExpiration(expiration);
-
-              // save in local storage
-              console.log("Saving token in local storage");
-              localStorage.setItem('googleTokenValue', response.access_token);
-              localStorage.setItem('googleTokenExpiration', expiration.toString());
-
-              log("[INFO] Google auth success");
+              const expiration = new Date().getTime() + response.expires_in * 1000;
+              const newToken = {
+                value: response.access_token,
+                expiration: expiration
+              };
+              setToken(newToken);
+              log("Saving token in local storage");
+              localStorage.setItem(GOOGLE_SIGN_IN_TOKEN, JSON.stringify(newToken));
             } else {
-              log("[ERROR] Missing at least one scope auth");
+              log("Missing at least one grant from user, scopes:", SCOPES);
             }
           } else {
-            log("[ERROR] No access token");
+            log("No access token in response for auth request:", response);
           }
         },
       });
@@ -141,23 +131,20 @@ const useGoogle = () => {
   }, []);
 
   useEffect(() => {
-
-    const hasPreviouslySignedIn = localStorage.getItem('hasPreviouslySignedIn') !== null;
+    const hasPreviouslySignedIn = localStorage.getItem(GOOGLE_SIGN_IN_TOKEN) !== null;
     if (client && token === null && hasPreviouslySignedIn) {
-      log("[INFO] Try silent refresh");
-      requestAuth();
+      requestSignIn();
     }
-
   }, [client]);
 
   useEffect(() => {
-    setIsSignedIn(token !== null && tokenExpiration !== null && tokenExpiration > new Date().getTime());
-  }, [token, tokenExpiration]);
+    setSignedIn(token !== null && token.value !== null && token.expiration > new Date().getTime());
+  }, [token]);
 
   return {
-    requestAuth,
-    isSignedIn,
+    signIn,
     signOut,
+    isSignedIn,
     googleDrive
   };
 
