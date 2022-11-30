@@ -39,13 +39,13 @@ async function syncLocalNote(googleDrive: GoogleDrive, note: Note, storageContex
       } else {
         console.log("[SYNC] Local note is more recent, uploading", note.id);
         const noteContent = await get(note.id, storageContext.noteStoreRef.current);
-        await googleDrive.updateFileById(file.id, note.id + '.json', JSON.stringify(noteContent), 'application/json');
+        await googleDrive.updateFileById(file.id, note.id + '.json', JSON.stringify(noteContent));
         console.log("[SYNC] Note uploaded", note.id);
       }
     } else {
       console.log("[SYNC] Note does not exist on GDrive, uploading", note.id);
       const noteContent = await get(note.id, storageContext.noteStoreRef.current);
-      await googleDrive.createFile(note.id + ".json", JSON.stringify(noteContent), note.title);
+      await googleDrive.createFile(note.id + ".json", JSON.stringify(noteContent), {title: note.title});
       console.log("[SYNC] Note uploaded", note.id);
     }
 
