@@ -4,14 +4,16 @@ import {StorageContext} from "./StorageContext";
 import {Note} from "../core/Note";
 import {useNavigate} from "react-router-dom";
 import {del, entries, set} from "idb-keyval";
-import {syncLocalNote, syncLocalNotes, syncRemoteNotes} from "../core/controller/GoogleDriveController";
 import log from "../core/Logger";
 import {getTimeSinceAsString} from "../core/utils/TimeUtils";
 import HomePageNavigation from "./HomePageNavigation";
+import useGoogleSync from "../hooks/useGoogleSync";
 
 export default function HomePageContainer() {
 
   const {signIn, signOut, isSignedIn, googleDrive} = useGoogle();
+  const {syncStatus, syncNote, syncAllNotes} = useGoogleSync(googleDrive);
+
   const {deleteFileByName} = googleDrive;
 
   const onSignIn = () => {
@@ -31,26 +33,10 @@ export default function HomePageContainer() {
     });
   }, []);
 
-  function onSyncProgress(noteId: string, progress: number) {
-    const note = notes.find((note) => note.id === noteId);
-    if (note) {
-      note.syncProgress = progress;
-      setNotes([...notes]);
-    }
-  }
-
   useEffect(() => {
     if (isSignedIn && storageContext) {
       setIsSyncing(true);
-      syncLocalNotes(googleDrive, notes, storageContext, onSyncProgress).then(() => {
-        console.log("Synced local notes");
-        return syncRemoteNotes(googleDrive, notes, storageContext, (note: Note) => {
-          setNotes((oldNotes) => [...oldNotes, note]);
-        })
-      }).then(() => {
-        console.log("Synced remote notes");
-        setIsSyncing(false);
-      });
+      syncAllNotes();
     }
   }, [isSignedIn]);
 
@@ -79,8 +65,13 @@ export default function HomePageContainer() {
     });
   }
 
-  const onForceSync = (note: Note|undefined = undefined) => {
+  const onForceSync = async (note: Note|undefined = undefined) => {
     onSignIn();
+    if (note) {
+      await syncNote(note);
+    } else {
+      await syncAllNotes();
+    }
   }
 
   const onAddNote = () => {
@@ -100,7 +91,7 @@ export default function HomePageContainer() {
     set(id, note, storageContext?.noteMetaStoreRef.current).then(async () => {
       if (!storageContext) return;
       setNotes([...notes, note]);
-      await syncLocalNote(googleDrive, note, storageContext, onSyncProgress);
+      await syncNote(note);
       navigate(`/map/${id}`);
     });
 
@@ -178,7 +169,7 @@ export default function HomePageContainer() {
                           onClick={() => onForceSync(note)}
                         >
                           <svg
-                            className={`w-5 h-5 ${note.syncProgress && (note.syncProgress !== -1 || note.syncProgress < 100) ? "animate-spin" : ""}`}
+                            className={`w-5 h-5 ${syncStatus.some(s => s.id === note.id && s.status === 'SYNCING') ? "animate-spin" : ""}`}
                             strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                           >
                             <path d="M21.168 8A10.003 10.003 0 0012 2C6.815 2 2.55 5.947 2.05 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

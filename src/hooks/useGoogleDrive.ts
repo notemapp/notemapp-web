@@ -1,7 +1,7 @@
 import {Token} from "./useGoogle";
 import log from "../core/Logger";
 
-interface GoogleDriveFile {
+export interface GoogleDriveFile {
   id: string;
   name: string;
   mimeType: string;
@@ -9,7 +9,7 @@ interface GoogleDriveFile {
   appProperties: any;
 }
 
-interface GoogleDriveFileMeta {
+export interface GoogleDriveFileMeta {
   id: string;
   name: string;
   mimeType: string;
@@ -177,12 +177,10 @@ const useGoogleDrive = (getToken: () => Promise<Token>) => {
     const metadata = {
       appProperties: {...props}
     };
-    const form = new FormData();
-    form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
     const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
       method: "PATCH",
-      headers: new Headers({ Authorization: `Bearer ${token.value}` }),
-      body: form,
+      headers: new Headers({ Authorization: `Bearer ${token.value}`, "Content-Type": "application/json" }),
+      body: JSON.stringify(metadata),
     });
     const json = await response.json();
     return {

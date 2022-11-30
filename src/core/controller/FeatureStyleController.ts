@@ -1,6 +1,5 @@
 import {Feature} from "ol";
 import {Fill, Stroke, Style} from "ol/style";
-import {InteractionType, toGeometryFeature} from "../InteractionType";
 import {MARKER_STYLE} from "../../hooks/useMapInteractions";
 
 const STYLES = {
@@ -37,15 +36,4 @@ function getStyleByFeature(feature: Feature): Style {
   return STYLES[feature.getGeometry().getType().toString()];
 }
 
-function getStyleByFeatureType(type: string): Style {
-  // @ts-ignore
-  return STYLES[type];
-}
-
-function getStyleByInteractionType(interactionType: InteractionType): Style {
-  console.log("getStyleByInteractionType", interactionType);
-  // @ts-ignore
-  return STYLES[toGeometryFeature(interactionType).type];
-}
-
-export { getStyleByFeature, getStyleByFeatureType, getStyleByInteractionType };
+export { getStyleByFeature };
