@@ -23,9 +23,9 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
     try {
       setSyncStatus((currentSyncStatus) => [...currentSyncStatus, {id: note.id, status: 'SYNCING'}])
       if (file) {
-        return syncWithRemote(file, note);
+        await syncWithRemote(file, note);
       } else {
-        return syncNewNote(note);
+        await syncNewNote(note);
       }
     } catch (e) {
       log("Failed syncing note:", note);
@@ -56,9 +56,14 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
         log(`Downloading note ${note.id} from drive`);
         await storage.updateNoteContent(note.id, JSON.parse(remoteNote));
         await storage.updateNoteMeta(note.id, {...note, modifiedOn: new Date(remoteModifiedOn).toISOString()});
-        if (fileMeta.appProperties) {
+
+        const notePropsFile = await googleDrive.getFileByName(`${note.id}.props`);
+        if (notePropsFile?.id) {
+          const noteProps = await googleDrive.getFileContentById(notePropsFile!.id).then(JSON.parse);
           const prefs = storage.getNotePrefs(note.id);
-          await storage.updateNotePrefs(note.id, {...prefs, ...fileMeta.appProperties});
+          const meta = storage.getNoteMeta(note.id);
+          await storage.updateNotePrefs(note.id, {...prefs, ...(noteProps as NotePrefs)});
+          await storage.updateNoteMeta(note.id, {...meta, ...(noteProps as Note)});
         }
 
       }
@@ -69,7 +74,8 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
       const localNote = await storage.getNoteContent(note.id);
       const localNoteProps = await storage.getNoteProps(note.id);
       await googleDrive.updateFileById(file.id, `${note.id}.json`, JSON.stringify(localNote));
-      await googleDrive.updateFileMetaById(file.id, localNoteProps);
+      const remoteNoteProps = await googleDrive.getFileByName(`${note.id}.props`);
+      await googleDrive.updateFileById(remoteNoteProps!.id, `${note.id}.props`, JSON.stringify(localNoteProps));
 
     }
 
@@ -85,7 +91,8 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
 
     const localNoteContent = await storage.getNoteContent(note.id);
     const localNoteProps = await storage.getNoteProps(note.id);
-    await googleDrive.createFile(`${note.id}.json`, JSON.stringify(localNoteContent), localNoteProps);
+    await googleDrive.createFile(`${note.id}.json`, JSON.stringify(localNoteContent), undefined);
+    await googleDrive.createFile(`${note.id}.props`, JSON.stringify(localNoteProps), undefined);
 
     setSyncStatus((currentSyncStatus) => [
       ...currentSyncStatus.filter(s => s.id === note.id), {id: note.id, status: 'DONE'}
@@ -108,14 +115,15 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
 
       const remoteNote = await googleDrive.getFileByName(`${remoteNoteId}.json`);
       const remoteNoteContent = await googleDrive.getFileContentById(remoteNote!.id);
-      const remoteNoteProps = await googleDrive.getFileMetaById(remoteNote!.id);
+      const remoteNotePropsFile = await googleDrive.getFileByName(`${remoteNote!.id}.props`);
+      const remoteNoteProps = await googleDrive.getFileContentById(remoteNotePropsFile!.id).then(JSON.parse);
 
       try {
 
         const newNoteContent = new GeoJSON().readFeatures(JSON.parse(remoteNoteContent));
         const noteMeta: Note = {
           id: remoteNoteId,
-          title: remoteNoteProps.appProperties?.title || "Untitled note",
+          title: remoteNoteProps.title || "Untitled note",
           createdOn: new Date(remoteNoteProps.createdOn).toISOString(),
           modifiedOn: new Date(remoteNoteProps.modifiedOn).toISOString(),
           syncProgress: 100   // TODO: deprecated field

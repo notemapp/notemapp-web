@@ -181,6 +181,7 @@ const useStorage = () => {
     updateNotePrefs,
     deleteNoteData,
     getNotePrefs,
+    getNoteMeta,
     getNoteContent,
     getNoteProps,
     getNotesIds,

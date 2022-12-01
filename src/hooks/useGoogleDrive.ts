@@ -26,7 +26,7 @@ export interface GoogleDrive {
   getFileMetaById: (fileId: string) => Promise<GoogleDriveFileMeta>;
   deleteFileById: (fileId: string) => Promise<void>;
   deleteFileByName: (fileName: string) => Promise<void>;
-  createFile: (fileName: string, content: string, props: object) => Promise<GoogleDriveFile>;
+  createFile: (fileName: string, content: string, props: object|undefined) => Promise<GoogleDriveFile>;
   updateFileById: (fileId: string, fileName: string, content: string) => Promise<GoogleDriveFile>;
   updateFileMetaById: (fileId: string, props: object) => Promise<GoogleDriveFile>
 }
@@ -42,7 +42,7 @@ const useGoogleDrive = (getToken: () => Promise<Token>) => {
     });
     const json = await response.json();
     const files = json.files as GoogleDriveFile[];
-    log(`Found ${files.length} files in appDataFolder`);
+    log(`Found ${files.length} files in appDataFolder:`, files);
 
     return files.filter((file) => file.mimeType === "application/json");
 
@@ -117,7 +117,7 @@ const useGoogleDrive = (getToken: () => Promise<Token>) => {
 
   }
 
-  async function createFile(fileName: string, content: string, props: object, mimeType: string = "application/json"): Promise<GoogleDriveFile> {
+  async function createFile(fileName: string, content: string, props: object|undefined, mimeType: string = "application/json"): Promise<GoogleDriveFile> {
 
     const token = await getToken();
     const metadata = {
