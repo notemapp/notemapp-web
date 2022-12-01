@@ -106,8 +106,9 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
 
     for (const remoteNoteId of missingNotesOnLocal) {
 
-      const remoteNoteContent = await googleDrive.getFileContentById(remoteNoteId);
-      const remoteNoteProps = await googleDrive.getFileMetaById(remoteNoteId);
+      const remoteNote = await googleDrive.getFileByName(`${remoteNoteId}.json`);
+      const remoteNoteContent = await googleDrive.getFileContentById(remoteNote!.id);
+      const remoteNoteProps = await googleDrive.getFileMetaById(remoteNote!.id);
 
       try {
 
