@@ -11,7 +11,7 @@ export interface SyncStatus {
   status: 'DONE'|'FAIL'|'SYNCING'
 }
 
-const useGoogleSync = (googleDrive: GoogleDrive) => {
+const useGoogleSync = (googleDrive: GoogleDrive, onNewNotes: () => void) => {
 
   const storage = useStorage();
   const [syncStatus, setSyncStatus] = useState<SyncStatus[]>([]);
@@ -59,7 +59,7 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
 
         const notePropsFile = await googleDrive.getFileByName(`${note.id}.props`);
         if (notePropsFile?.id) {
-          const noteProps = await googleDrive.getFileContentById(notePropsFile!.id).then(JSON.parse);
+          const noteProps = JSON.parse(await googleDrive.getFileContentById(notePropsFile!.id));
           const prefs = storage.getNotePrefs(note.id);
           const meta = storage.getNoteMeta(note.id);
           await storage.updateNotePrefs(note.id, {...prefs, ...(noteProps as NotePrefs)});
@@ -110,18 +110,18 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
       .map(file => file.name.replace(".json", ""));
 
     const missingNotesOnLocal = remoteNotesIds.filter(id => !localNotesIds.includes(id));
+    log(`Found ${missingNotesOnLocal.length} notes not on local`, missingNotesOnLocal);
 
     for (const remoteNoteId of missingNotesOnLocal) {
 
       const remoteNote = await googleDrive.getFileByName(`${remoteNoteId}.json`);
       const remoteNoteContent = await googleDrive.getFileContentById(remoteNote!.id);
-      const remoteNotePropsFile = await googleDrive.getFileByName(`${remoteNote!.id}.props`);
+      const remoteNotePropsFile = await googleDrive.getFileByName(`${remoteNoteId}.props`);
 
       if (!remoteNotePropsFile?.id) continue;
-      const remoteNoteProps = await googleDrive.getFileContentById(remoteNotePropsFile!.id).then(JSON.parse);
+      const remoteNoteProps = JSON.parse(await googleDrive.getFileContentById(remoteNotePropsFile!.id));
 
       try {
-
         const newNoteContent = new GeoJSON().readFeatures(JSON.parse(remoteNoteContent));
         const noteMeta: Note = {
           id: remoteNoteId,
@@ -146,6 +146,8 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
       }
 
     }
+
+    if (missingNotesOnLocal.length > 0) onNewNotes();
 
   }
 

@@ -6,6 +6,7 @@ import {GeoJSON} from "ol/format";
 import log from "../core/Logger";
 import {Note} from "../core/Note";
 import {TileLayerType} from "../core/TileLayerType";
+import {Geometry} from "ol/geom";
 
 const useStorage = () => {
 
@@ -71,7 +72,7 @@ const useStorage = () => {
 
   }
 
-  async function updateNoteContent(id: string, content: object, onUpdate: (() => void)|undefined = undefined) {
+  async function updateNoteContent(id: string, content: Feature<Geometry>[], onUpdate: (() => void)|undefined = undefined) {
 
     if (!onUpdate) onUpdate = () => log("Updated content for note:", id);
 
@@ -81,7 +82,7 @@ const useStorage = () => {
 
   }
 
-  async function setNoteContent(id: string, content: object, onSet: (() => void)|undefined = undefined) {
+  async function setNoteContent(id: string, content: Feature<Geometry>[], onSet: (() => void)|undefined = undefined) {
 
     if (!onSet) onSet = () => log("Created content for note:", id);
 
@@ -151,7 +152,7 @@ const useStorage = () => {
 
   async function getNoteProps(id: string): Promise<object> {
 
-    const notePrefs = await getNoteContent(id);
+    const notePrefs = await getNotePrefs(id);
     const noteMeta = await getNoteMeta(id);
 
     return {...notePrefs, ...noteMeta};

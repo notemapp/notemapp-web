@@ -3,16 +3,17 @@ import {useContext, useEffect, useState} from "react";
 import {StorageContext} from "./StorageContext";
 import {Note} from "../core/Note";
 import {useNavigate} from "react-router-dom";
-import {del, entries, set} from "idb-keyval";
+import {del, set} from "idb-keyval";
 import log from "../core/Logger";
 import {getTimeSinceAsString} from "../core/utils/TimeUtils";
 import HomePageNavigation from "./HomePageNavigation";
 import useGoogleSync from "../hooks/useGoogleSync";
+import useStorage from "../hooks/useStorage";
 
 export default function HomePageContainer() {
 
   const {signIn, signOut, isSignedIn, googleDrive} = useGoogle();
-  const {syncStatus, syncNote, syncAllNotes} = useGoogleSync(googleDrive);
+  const {syncStatus, syncNote, syncAllNotes} = useGoogleSync(googleDrive, onNewNotes);
 
   const {deleteFileByName} = googleDrive;
 
@@ -21,14 +22,17 @@ export default function HomePageContainer() {
     signIn();
   }
 
+  const storage = useStorage();
   const storageContext = useContext(StorageContext);
   const [notes, setNotes] = useState<Note[]>([]);
   const navigate = useNavigate();
 
+  function onNewNotes() {
+    storage.getNotes().then(setNotes);
+  }
+
   useEffect(() => {
-    entries(storageContext?.noteMetaStoreRef.current).then((entries) => {
-      setNotes(entries.map((entry) => entry[1]));
-    });
+    storage.getNotes().then(setNotes);
   }, []);
 
   useEffect(() => {
