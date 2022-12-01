@@ -114,6 +114,10 @@ const useGoogleSync = (googleDrive: GoogleDrive, onNewNotes: () => void) => {
 
     for (const remoteNoteId of missingNotesOnLocal) {
 
+      setSyncStatus((currentSyncStatus) => [
+        ...currentSyncStatus.filter(s => s.id !== remoteNoteId), {id: remoteNoteId, status: 'SYNCING'}
+      ]);
+
       const remoteNote = await googleDrive.getFileByName(`${remoteNoteId}.json`);
       const remoteNoteContent = await googleDrive.getFileContentById(remoteNote!.id);
       const remoteNotePropsFile = await googleDrive.getFileByName(`${remoteNoteId}.props`);
@@ -141,8 +145,15 @@ const useGoogleSync = (googleDrive: GoogleDrive, onNewNotes: () => void) => {
         await storage.setNoteMeta(remoteNoteId, noteMeta);
         await storage.setNotePrefs(remoteNoteId, notePrefs);
 
+        setSyncStatus((currentSyncStatus) => [
+          ...currentSyncStatus.filter(s => s.id !== remoteNoteId), {id: remoteNoteId, status: 'DONE'}
+        ]);
+
       } catch (e) {
         log("Ignoring note on remote with invalid content:", remoteNoteId);
+        setSyncStatus((currentSyncStatus) => [
+          ...currentSyncStatus.filter(s => s.id !== remoteNoteId), {id: remoteNoteId, status: 'FAIL'}
+        ]);
       }
 
     }
