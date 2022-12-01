@@ -30,7 +30,7 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
     } catch (e) {
       log("Failed syncing note:", note);
       setSyncStatus((currentSyncStatus) => [
-        ...currentSyncStatus.filter(s => s.id === note.id), {id: note.id, status: 'FAIL'}
+        ...currentSyncStatus.filter(s => s.id !== note.id), {id: note.id, status: 'FAIL'}
       ]);
     }
 
@@ -80,7 +80,7 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
     }
 
     setSyncStatus((currentSyncStatus) => [
-      ...currentSyncStatus.filter(s => s.id === note.id), {id: note.id, status: 'DONE'}
+      ...currentSyncStatus.filter(s => s.id !== note.id), {id: note.id, status: 'DONE'}
     ]);
 
   }
@@ -95,7 +95,7 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
     await googleDrive.createFile(`${note.id}.props`, JSON.stringify(localNoteProps), undefined);
 
     setSyncStatus((currentSyncStatus) => [
-      ...currentSyncStatus.filter(s => s.id === note.id), {id: note.id, status: 'DONE'}
+      ...currentSyncStatus.filter(s => s.id !== note.id), {id: note.id, status: 'DONE'}
     ]);
 
   }
@@ -116,6 +116,8 @@ const useGoogleSync = (googleDrive: GoogleDrive) => {
       const remoteNote = await googleDrive.getFileByName(`${remoteNoteId}.json`);
       const remoteNoteContent = await googleDrive.getFileContentById(remoteNote!.id);
       const remoteNotePropsFile = await googleDrive.getFileByName(`${remoteNote!.id}.props`);
+
+      if (!remoteNotePropsFile?.id) continue;
       const remoteNoteProps = await googleDrive.getFileContentById(remoteNotePropsFile!.id).then(JSON.parse);
 
       try {

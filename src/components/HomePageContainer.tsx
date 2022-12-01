@@ -25,8 +25,6 @@ export default function HomePageContainer() {
   const [notes, setNotes] = useState<Note[]>([]);
   const navigate = useNavigate();
 
-  const [_, setIsSyncing] = useState(false);
-
   useEffect(() => {
     entries(storageContext?.noteMetaStoreRef.current).then((entries) => {
       setNotes(entries.map((entry) => entry[1]));
@@ -35,7 +33,6 @@ export default function HomePageContainer() {
 
   useEffect(() => {
     if (isSignedIn && storageContext) {
-      setIsSyncing(true);
       syncAllNotes();
     }
   }, [isSignedIn]);
