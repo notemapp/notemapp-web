@@ -44,7 +44,7 @@ export default function TileLayerToolbar(props: {
             <img
               src={'/assets/' + TILE_LAYER_TYPE_TO_IMG.get(currentLayer)}
               alt={TILE_LAYER_TYPE_TO_ALT.get(currentLayer)}
-              className="h-full w-full object-cover rounded border border-4 border-yellow-600"
+              className="h-full w-full object-cover rounded border border-4 border-gray-100"
             />
             <span
               className="
