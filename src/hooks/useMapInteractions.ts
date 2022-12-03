@@ -22,14 +22,18 @@ import AnnotationMarkerPopupContent, {
 } from "../components/AnnotationMarkerPopupContent";
 import useMarkdownRenderer from "./useMarkdownRenderer";
 
-export const MARKER_STYLE = new Style({
-  image: new Icon({
-    anchor: [0, 0],
-    anchorXUnits: 'fraction',
-    anchorYUnits: 'pixels',
-    src: '/assets/icons/note.svg',
-  }),
-});
+function getIconStyle(assetSrc: string) {
+  return new Style({
+    image: new Icon({
+      anchor: [0, 0],
+      anchorXUnits: 'fraction',
+      anchorYUnits: 'pixels',
+      src: assetSrc,
+    }),
+  });
+}
+
+export const MARKER_STYLE = getIconStyle('/assets/icons/note.svg');
 
 const useMapInteractions = (
   id: string,
@@ -117,22 +121,38 @@ const useMapInteractions = (
     }
 
     if (interactionType === InteractionType.Select && featuresLayerRef.current) {
-      const selected = new Style({
+
+      const selectedPolyStyle = new Style({
         fill: new Fill({
-          color: 'yellow',
+          color: 'rgba(204,148,20,0.50)',
         }),
         stroke: new Stroke({
-          color: 'yellow',
-          width: 4,
-        }),
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({ color: 'yellow' }),
-          stroke: new Stroke({ color: 'yellow', width: 2 }),
+          color: 'rgba(204,148,20,0.60)',
+          width: 3,
         })
       });
+
+      const selectedLineStringStyle = new Style({
+        stroke: new Stroke({
+          color: 'rgba(224,28,28,1)',
+          width: 3,
+        })
+      });
+      
+      const selectedMarkerStyle = getIconStyle('/assets/icons/selected-note.svg');
+
       function selectStyle(feature: any) {
-        return selected;
+
+        const featureType = feature.getGeometry().getType().toString();
+
+        if ('Point' === featureType) {
+          return selectedMarkerStyle;
+        } else if ('LineString' === featureType) {
+          return selectedLineStringStyle;
+        } else {
+          return selectedPolyStyle;
+        }
+
       }
       selectInteractionRef.current = new Select({
         style: selectStyle,

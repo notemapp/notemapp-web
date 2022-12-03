@@ -32,8 +32,8 @@ export default function SideToolbar(props: {
           props.selectedFeature &&
           <button
             className="
-              w-12 h-12 rounded flex justify-center items-center group relative bg-gray-100 hover:bg-gray-300
-              shadow drop-shadow-lg mt-2 animate-pulse
+              w-12 h-12 rounded flex justify-center items-center group relative bg-red-600 hover:bg-red-700 text-white
+              shadow drop-shadow-lg mt-2
             "
             onClick={props.onDeleteFeature}
           >
