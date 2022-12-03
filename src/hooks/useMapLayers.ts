@@ -44,12 +44,12 @@ const useMapLayers = (
       layer.current = new LayerGroup({
         layers: [
           new TileLayer({
-            visible: true,
+            visible: false,
             preload: Infinity,
             source: new Stamen({layer: 'toner'})
           }),
           new TileLayer({
-            visible: false,
+            visible: true,
             preload: Infinity,
             source: new BingMaps({
               key: import.meta.env.VITE_BING_API_KEY,
@@ -68,7 +68,7 @@ const useMapLayers = (
       });
 
       get(id, storageContext?.notePrefsStoreRef.current).then((prefs: NotePrefs) => {
-        const lastUsedLayer = prefs?.layer || TileLayerType.PAPER;
+        const lastUsedLayer = prefs?.layer || TileLayerType.STREET;
         layer.current?.getLayers().forEach((l, i) => l.setVisible(i === lastUsedLayer.valueOf()));
         log("[INIT] Loaded last layer from store:", lastUsedLayer.toString());
       });

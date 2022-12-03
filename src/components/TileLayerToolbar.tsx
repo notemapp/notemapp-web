@@ -20,7 +20,7 @@ export default function TileLayerToolbar(props: {
   onTileLayerToggle: (tileLayerType: TileLayerType) => void;
 }) {
 
-  const currentLayer = props.currentLayer || TileLayerType.PAPER;
+  const currentLayer = props.currentLayer || TileLayerType.STREET;
 
   const getOtherLayers = (currentLayer: TileLayerType) =>
     TILE_LAYERS.filter((layer) => layer !== currentLayer);
