@@ -1,6 +1,7 @@
 import {useNavigate} from "react-router-dom";
 
 export default function MapPageNavbar(props: {
+  title: string|undefined;
   onOpenDrawer: () => void;
 }) {
 
@@ -20,8 +21,11 @@ export default function MapPageNavbar(props: {
             <path d="M18.5 12H6m0 0l6-6m-6 6l6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div className="w-12 h-12 flex bg-white rounded-full shadow drop-shadow-lg z-10">
-          <img src="/assets/logo768.svg" alt="notemapp logo" className="w-8 h-8 m-auto" />
+        <div
+          className="
+            w-56 h-12 flex bg-white font-semibold text-black rounded-full shadow drop-shadow-lg z-10
+          ">
+          <p className="w-full h-fit px-2 text-center m-auto truncate overflow-hidden">{props.title}</p>
         </div>
         <button
           onClick={props.onOpenDrawer}
