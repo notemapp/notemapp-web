@@ -113,7 +113,7 @@ export default function HomePageContainer() {
                   onClick={() => onForceSync()}
                   className="
                     w-12 h-full rounded flex justify-center items-center
-                    bg-gray-200 hover:bg-gray-300
+                    bg-gray-100 hover:bg-gray-300
                   "
                 >
                   <svg
@@ -134,7 +134,7 @@ export default function HomePageContainer() {
                 onClick={() => onAddNote()}
                 className="
                   w-12 h-full rounded flex justify-center items-center
-                  bg-gray-200 hover:bg-gray-300
+                  bg-gray-100 hover:bg-gray-300
                 "
               >
                 <svg className="w-6 h-6" strokeWidth="1.5" viewBox="0 0 24 24" fill="none"

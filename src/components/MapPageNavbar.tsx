@@ -23,7 +23,7 @@ export default function MapPageNavbar(props: {
         </button>
         <div
           className="
-            w-56 h-12 flex bg-white font-semibold text-black rounded-full shadow drop-shadow-lg z-10
+            w-56 h-12 flex bg-gray-100 font-semibold text-black rounded-lg shadow drop-shadow-lg z-10
           ">
           <p className="w-full h-fit px-2 text-center m-auto truncate overflow-hidden">{props.title}</p>
         </div>
