@@ -76,7 +76,7 @@ const useStorage = () => {
 
     if (!onUpdate) onUpdate = () => log("Updated content for note:", id);
 
-    await update(id, (_) => content, storageContext?.noteStoreRef.current);
+    await update(id, (_) => new GeoJSON().writeFeatures(content), storageContext?.noteStoreRef.current);
 
     onUpdate();
 
@@ -86,7 +86,7 @@ const useStorage = () => {
 
     if (!onSet) onSet = () => log("Created content for note:", id);
 
-    await set(id, content, storageContext?.noteStoreRef.current);
+    await set(id, new GeoJSON().writeFeatures(content), storageContext?.noteStoreRef.current);
 
     onSet();
 
@@ -146,7 +146,8 @@ const useStorage = () => {
 
   async function getNoteContent(id: string): Promise<object|undefined> {
 
-    return await get(id, storageContext?.noteStoreRef.current);
+    const features = await get(id, storageContext?.noteStoreRef.current);
+    return new GeoJSON().readFeatures(features);
 
   }
 
