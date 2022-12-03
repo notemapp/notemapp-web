@@ -5,12 +5,12 @@ const TILE_LAYERS = [
   TileLayerType.PAPER, TileLayerType.SATELLITE, TileLayerType.STREET
 ];
 const TILE_LAYER_TYPE_TO_IMG = new Map([
-  [TileLayerType.PAPER, "layer-1.png"],
-  [TileLayerType.SATELLITE, "layer-3.png"],
-  [TileLayerType.STREET, "layer-2.png"]
+  [TileLayerType.PAPER, "paper-layer.png"],
+  [TileLayerType.SATELLITE, "satellite-layer.png"],
+  [TileLayerType.STREET, "street-layer.png"]
 ]);
 const TILE_LAYER_TYPE_TO_ALT = new Map([
-  [TileLayerType.PAPER, "black and white"],
+  [TileLayerType.PAPER, "paper"],
   [TileLayerType.SATELLITE, "satellite"],
   [TileLayerType.STREET, "street"]
 ]);
@@ -48,18 +48,18 @@ export default function TileLayerToolbar(props: {
             />
             <span
               className="
-                w-max h-auto absolute flex bottom-2 right-0 rounded-lg -z-10
+                w-max h-auto absolute flex bottom-2 right-2 rounded-lg -z-10
                 text-center text-white grid grid-cols-1 shadow drop-shadow-lg space-y-1
                 transition-all ease-in-out opacity-0 pointer-events-none
                 group-hover:transition-all group-hover:duration-500 group-hover:opacity-100
-                group-hover:-translate-y-24 hover:-translate-y-24 group-hover:pointer-events-auto
+                group-hover:-translate-y-12 hover:-translate-y-12 group-hover:pointer-events-auto
               "
             >
               {
-                tileLayers.slice().reverse().slice(0, -1).map(tileLayerType => (
+                tileLayers.slice().reverse().slice(0, -1).map((tileLayerType, i) => (
                   <button
                     key={tileLayerType}
-                    className="w-20 h-20 shadow rounded drop-shadow-lg"
+                    className={`w-20 h-20 shadow rounded drop-shadow-lg absolute bottom-${i * 10} right-0 z-${10 - i * 10} hover:transition ease-in-out hover:-translate-y-1 hover:scale-110 duration-100`}
                     onClick={() => props.onTileLayerToggle(tileLayerType)}
                   >
                     <img
