@@ -121,12 +121,20 @@ const useMapInteractions = (
     }
 
     if (interactionType === InteractionType.Select && featuresLayerRef.current) {
-      const selectedFeatureStyle = new Style({
+
+      const selectedPolyStyle = new Style({
         fill: new Fill({
-          color: 'rgba(204,148,20,0.35)',
+          color: 'rgba(204,148,20,0.50)',
         }),
         stroke: new Stroke({
-          color: 'rgba(204,148,20,0.35)',
+          color: 'rgba(204,148,20,0.60)',
+          width: 3,
+        })
+      });
+
+      const selectedLineStringStyle = new Style({
+        stroke: new Stroke({
+          color: 'rgba(224,28,28,1)',
           width: 3,
         })
       });
@@ -134,11 +142,17 @@ const useMapInteractions = (
       const selectedMarkerStyle = getIconStyle('/assets/icons/selected-note.svg');
 
       function selectStyle(feature: any) {
-        if ('Point' === feature.getGeometry().getType().toString()) {
+
+        const featureType = feature.getGeometry().getType().toString();
+
+        if ('Point' === featureType) {
           return selectedMarkerStyle;
+        } else if ('LineString' === featureType) {
+          return selectedLineStringStyle;
+        } else {
+          return selectedPolyStyle;
         }
 
-        return selectedFeatureStyle;
       }
       selectInteractionRef.current = new Select({
         style: selectStyle,
