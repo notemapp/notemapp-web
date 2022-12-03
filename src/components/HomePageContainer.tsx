@@ -199,9 +199,9 @@ export default function HomePageContainer() {
                         </button>
                       </div>
                     </div>
-                    <div className="pt-2 font-normal text-sm flex flex-col">
-                      <span>Created { getTimeSinceAsString(new Date(note.createdOn)) } ago</span>
-                      <span>Modified { getTimeSinceAsString(new Date(note.modifiedOn)) } ago</span>
+                    <div className="pt-2 font-normal text-sm md:flex md:space-x-4">
+                      <div>Created { getTimeSinceAsString(new Date(note.createdOn)) } ago</div>
+                      <div>Modified { getTimeSinceAsString(new Date(note.modifiedOn)) } ago</div>
                     </div>
                   </div>
                 ))
