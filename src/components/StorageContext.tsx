@@ -3,6 +3,7 @@ import {createStore, UseStore} from "idb-keyval";
 import {DB_NOTES, DB_NOTES_META, DB_NOTES_PREFS, STORE_NOTES, STORE_NOTES_META, STORE_NOTES_PREFS} from "../core/Keys";
 import {TileLayerType} from "../core/TileLayerType";
 import {Coordinate} from "ol/coordinate";
+import {Note} from "../core/Note";
 
 export interface StorageContextInterface {
   noteStoreRef: MutableRefObject<UseStore|undefined>;
@@ -15,6 +16,25 @@ export interface NotePrefs {
   center: Coordinate;
   zoom: number;
   rotation: number;
+}
+
+export const notePrefsFromNoteProps = (noteProps: any) => {
+  return {
+    layer: noteProps.layer,
+    center: noteProps.center,
+    zoom: noteProps.zoom,
+    rotation: noteProps.rotation
+  } as NotePrefs;
+}
+
+export const noteMetaFromNoteProps = (noteProps: any) => {
+  return {
+    id: noteProps.id,
+    title: noteProps.title,
+    createdOn: noteProps.createdOn,
+    modifiedOn: noteProps.modifiedOn,
+    syncProgress: noteProps.syncProgress
+  } as Note;
 }
 
 export const StorageContext = createContext<StorageContextInterface|null>(null);

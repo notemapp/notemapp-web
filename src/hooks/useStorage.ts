@@ -6,6 +6,7 @@ import {GeoJSON} from "ol/format";
 import log from "../core/Logger";
 import {Note} from "../core/Note";
 import {TileLayerType} from "../core/TileLayerType";
+import {Coordinate} from "ol/coordinate";
 
 const useStorage = () => {
 
@@ -113,7 +114,7 @@ const useStorage = () => {
 
   async function updateNoteMeta(id: string, meta: Note, onUpdate: (() => void)|undefined = undefined) {
 
-    if (!onUpdate) onUpdate = () => log("Updated meta for note:", id);
+    if (!onUpdate) onUpdate = () => log("Updated meta for note:", id, meta);
 
     await update(id, (_) => meta, storageContext?.noteMetaStoreRef.current);
 
@@ -123,7 +124,7 @@ const useStorage = () => {
 
   async function updateNotePrefs(id: string, prefs: NotePrefs, onUpdate: (() => void)|undefined = undefined) {
 
-    if (!onUpdate) onUpdate = () => log("Updated prefs for note:", id);
+    if (!onUpdate) onUpdate = () => log("Updated prefs for note:", id, prefs);
 
     await update(id, (_) => prefs, storageContext?.notePrefsStoreRef.current);
 
@@ -154,7 +155,17 @@ const useStorage = () => {
     const notePrefs = await getNotePrefs(id);
     const noteMeta = await getNoteMeta(id);
 
-    return {...notePrefs, ...noteMeta};
+    return {
+      layer: notePrefs?.layer || 0,
+      center: notePrefs?.center || [-11000000, 4600000],
+      zoom: notePrefs?.zoom || 4,
+      rotation: notePrefs?.rotation || 0,
+      id: id,
+      title: noteMeta?.title || 'Untitled note',
+      createdOn: noteMeta?.createdOn || new Date().toISOString(),
+      modifiedOn: noteMeta?.modifiedOn || new Date().toISOString(),
+      syncProgress: 100
+    };
 
   }
 

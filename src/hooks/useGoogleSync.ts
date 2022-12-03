@@ -4,7 +4,7 @@ import {useState} from "react";
 import useStorage from "./useStorage";
 import log from "../core/Logger";
 import {GeoJSON} from "ol/format";
-import {NotePrefs} from "../components/StorageContext";
+import {noteMetaFromNoteProps, NotePrefs, notePrefsFromNoteProps} from "../components/StorageContext";
 
 export interface SyncStatus {
   id: string,
@@ -59,11 +59,12 @@ const useGoogleSync = (googleDrive: GoogleDrive, onNewNotes: () => void) => {
 
         const notePropsFile = await googleDrive.getFileByName(`${note.id}.props`);
         if (notePropsFile?.id) {
+          log(`Gathering note ${note.id} props from remote`);
           const noteProps = JSON.parse(await googleDrive.getFileContentById(notePropsFile!.id));
           const prefs = storage.getNotePrefs(note.id);
           const meta = storage.getNoteMeta(note.id);
-          await storage.updateNotePrefs(note.id, {...prefs, ...(noteProps as NotePrefs)});
-          await storage.updateNoteMeta(note.id, {...meta, ...(noteProps as Note)});
+          await storage.updateNotePrefs(note.id, {...prefs, ...notePrefsFromNoteProps(noteProps)});
+          await storage.updateNoteMeta(note.id, {...meta, ...noteMetaFromNoteProps(noteProps)});
         }
 
       }
@@ -73,6 +74,7 @@ const useGoogleSync = (googleDrive: GoogleDrive, onNewNotes: () => void) => {
       log(`Note ${note.id} is more recent on local, uploading`);
       const localNote = await storage.getNoteContent(note.id);
       const localNoteProps = await storage.getNoteProps(note.id);
+      log(`Fetched local note ${note.id} props:`, localNoteProps);
       await googleDrive.updateFileById(file.id, `${note.id}.json`, localNote!);
       const remoteNoteProps = await googleDrive.getFileByName(`${note.id}.props`);
       await googleDrive.updateFileById(remoteNoteProps!.id, `${note.id}.props`, JSON.stringify(localNoteProps));
@@ -134,10 +136,10 @@ const useGoogleSync = (googleDrive: GoogleDrive, onNewNotes: () => void) => {
           syncProgress: 100   // TODO: deprecated field
         };
         const notePrefs: NotePrefs = {
-          layer: remoteNoteProps.appProperties?.layer || 0,
-          center: remoteNoteProps.appProperties?.center || [-11000000, 4600000],
-          zoom: remoteNoteProps.appProperties?.zoom || 4,
-          rotation: remoteNoteProps.appProperties?.rotation || 0
+          layer: remoteNoteProps?.layer || 0,
+          center: remoteNoteProps?.center || [-11000000, 4600000],
+          zoom: remoteNoteProps?.zoom || 4,
+          rotation: remoteNoteProps?.rotation || 0
         }
 
         await storage.setNoteContent(remoteNoteId, remoteNoteContent);
