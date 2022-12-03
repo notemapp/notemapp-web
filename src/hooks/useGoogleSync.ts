@@ -3,7 +3,6 @@ import {Note} from "../core/Note";
 import {useState} from "react";
 import useStorage from "./useStorage";
 import log from "../core/Logger";
-import {GeoJSON} from "ol/format";
 import {noteMetaFromNoteProps, NotePrefs, notePrefsFromNoteProps} from "../components/StorageContext";
 
 export interface SyncStatus {

@@ -152,14 +152,17 @@ export default function HomePageContainer() {
                   <div
                     key={note.id}
                     onClick={() => navigate(`/map/${note.id}`)}
-                    className="bg-gray-100 p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto hover:bg-gray-200"
+                    className="bg-white p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto hover:bg-gray-100"
                   >
                     <div className="flex justify-between">
                       <div className="w-auto flex space-x-2 justify-start">
                         <span className="font-semibold text-lg text-ellipsis overflow-hidden max-w-2xl">{note.title}</span>
                         <button
                           className="text-gray-500 hover:text-gray-900"
-                          onClick={() => onEditNote(note)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditNote(note);
+                          }}
                         >
                           <svg className="w-5 h-5" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor">
                             <path d="M3 21h18M12.222 5.828L15.05 3 20 7.95l-2.828 2.828m-4.95-4.95l-5.607 5.607a1 1 0 00-.293.707v4.536h4.536a1 1 0 00.707-.293l5.607-5.607m-4.95-4.95l4.95 4.95" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -169,7 +172,10 @@ export default function HomePageContainer() {
                       <div className="space-x-2">
                         <button
                           className="text-gray-500 hover:text-gray-900"
-                          onClick={() => onForceSync(note)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onForceSync(note);
+                          }}
                         >
                           <svg
                             className={`w-5 h-5 ${syncStatus.some(s => s.id === note.id && s.status === 'SYNCING') ? "animate-spin" : ""}`}
@@ -182,7 +188,10 @@ export default function HomePageContainer() {
                         </button>
                         <button
                           className="text-gray-500 hover:text-gray-900"
-                          onClick={() => onDeleteNote(note)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteNote(note);
+                          }}
                         >
                           <svg className="w-5 h-5" viewBox="0 0 24 24" strokeWidth="1.5" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 9l-1.995 11.346A2 2 0 0116.035 22h-8.07a2 2 0 01-1.97-1.654L4 9M21 6h-5.625M3 6h5.625m0 0V4a2 2 0 012-2h2.75a2 2 0 012 2v2m-6.75 0h6.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -190,7 +199,7 @@ export default function HomePageContainer() {
                         </button>
                       </div>
                     </div>
-                    <div className="pt-2 space-x-4 font-normal text-sm">
+                    <div className="pt-2 font-normal text-sm flex flex-col">
                       <span>Created { getTimeSinceAsString(new Date(note.createdOn)) } ago</span>
                       <span>Modified { getTimeSinceAsString(new Date(note.modifiedOn)) } ago</span>
                     </div>
