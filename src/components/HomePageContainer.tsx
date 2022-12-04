@@ -103,9 +103,8 @@ export default function HomePageContainer() {
       <HomePageNavigation isSignedIn={isSignedIn} onForceSync={onForceSync} onSignOut={signOut} />
       <div className="p-4 max-w-4xl flex-col m-auto">
         <div>
-
           <div className="h-12 flex justify-between">
-            <h1 className="text-2xl font-bold">My notes</h1>
+          <h1 className="text-2xl font-bold ">My notes</h1>
             <div className="flex space-x-2">
               {
                 isSignedIn &&
@@ -152,7 +151,7 @@ export default function HomePageContainer() {
                   <div
                     key={note.id}
                     onClick={() => navigate(`/map/${note.id}`)}
-                    className="bg-white p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto hover:bg-gray-100"
+                    className={`bg-white p-4 rounded-lg shadow drop-shadow-lg min-w-fit max-w-4xl mx-auto hover:bg-gray-100`}
                   >
                     <div className="flex justify-between">
                       <div className="w-auto flex space-x-2 justify-start">

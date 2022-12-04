@@ -48,18 +48,18 @@ export default function TileLayerToolbar(props: {
             />
             <span
               className="
-                w-max h-auto absolute flex bottom-2 right-2 rounded-lg -z-10
-                text-center text-white grid grid-cols-1 shadow drop-shadow-lg space-y-1
+                w-max h-max absolute flex bottom-2 right-0 rounded-lg -z-10
+                text-center text-white grid grid-cols-1 shadow drop-shadow-lg space-y-2
                 transition-all ease-in-out opacity-0 pointer-events-none
-                group-hover:transition-all group-hover:duration-500 group-hover:opacity-100
-                group-hover:-translate-y-12 hover:-translate-y-12 group-hover:pointer-events-auto
+                group-hover:transition-all group-hover:duration-300 group-hover:opacity-100
+                group-hover:-translate-y-24 hover:-translate-y-24 group-hover:pointer-events-auto
               "
             >
               {
                 tileLayers.slice().reverse().slice(0, -1).map((tileLayerType, i) => (
                   <button
                     key={tileLayerType}
-                    className={`w-20 h-20 shadow rounded drop-shadow-lg absolute bottom-${i * 10} right-0 z-${10 - i * 10} hover:transition ease-in-out hover:-translate-y-1 hover:scale-110 duration-100`}
+                    className={`w-20 h-20 shadow rounded drop-shadow-lg right-0 hover:transition ease-in-out hover:-translate-y-1 hover:-translate-x-3 hover:scale-110 duration-100`}
                     onClick={() => props.onTileLayerToggle(tileLayerType)}
                   >
                     <img

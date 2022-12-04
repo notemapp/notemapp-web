@@ -4,10 +4,11 @@ export default function HomePageNavbar(props: {
 
   return (
     <div className="w-full h-auto p-4 bg-white">
-      <div className="w-full h-12 flex justify-center px-0 relative">
-        <div className="w-12 h-12 flex bg-white">
-          <img src="/assets/logo768.svg" alt="notemapp logo" className="w-12 h-12 m-auto" />
+      <div className="w-full h-20 flex px-0 relative">
+        <div className="w-20 h-20 flex bg-white">
+          <img src="/assets/logo768.svg" alt="notemapp logo" className="w-20 h-20 m-auto" />
         </div>
+        <img src="public/assets/text-logo.svg" width="200" height="200" alt="text-logo"/>
         <button
           onClick={props.onOpenDrawer}
           className="
