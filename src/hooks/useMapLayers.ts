@@ -2,7 +2,6 @@ import {MutableRefObject, useContext, useRef} from "react";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import LayerGroup from "ol/layer/Group";
-import {getStyleByFeature} from "../core/controller/FeatureStyleController";
 import {StyleLike} from "ol/style/Style";
 import {NotePrefs, StorageContext} from "../components/StorageContext";
 import TileLayer from "ol/layer/Tile";
@@ -10,6 +9,7 @@ import {BingMaps, Stamen} from "ol/source";
 import {get} from "idb-keyval";
 import log from "../core/Logger";
 import {TileLayerType} from "../core/TileLayerType";
+import useMapStyling from "./useMapStyling";
 
 const useMapLayers = (
   id: string,
@@ -18,6 +18,7 @@ const useMapLayers = (
 ) => {
 
   const storageContext = useContext(StorageContext);
+  const mapStyling = useMapStyling();
 
   const featuresLayerRef = useRef<VectorLayer<VectorSource>>();
   const locationLayerRef = useRef<VectorLayer<VectorSource>>();
@@ -31,7 +32,7 @@ const useMapLayers = (
     if (!layer.current) {
       layer.current = new VectorLayer({
         source: source.current,
-        style: getStyleByFeature as StyleLike
+        style: mapStyling.getStyleByFeature as StyleLike
       });
     }
 
