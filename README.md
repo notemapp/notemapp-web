@@ -12,3 +12,7 @@
 - Sync notes with Google Drive
 - Export note as image
 - Export note in GeoJSON format
+
+### Contributing, feedback, suggestions
+
+For any idea/feedback/suggestion you may have please message us on [this](https://github.com/notemapp/notemapp-web/discussions/45) Github discussion.
