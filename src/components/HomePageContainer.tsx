@@ -107,29 +107,26 @@ export default function HomePageContainer() {
           <div className="h-12 flex justify-between">
             <h1 className="text-2xl font-bold">My notes</h1>
             <div className="flex space-x-2">
-              {
-                isSignedIn &&
-                <button
-                  onClick={() => onForceSync()}
-                  className="
-                    w-12 h-full rounded flex justify-center items-center
-                    bg-gray-100 hover:bg-gray-300
-                  "
-                >
-                  <svg
-                    className={`w-6 h-6 ${syncStatus.some(s => s.status === 'SYNCING') ? "animate-spin" : ""}`}
-                    strokeWidth="1.5" viewBox="0 0 24 24" fill="none"
-                       xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21.168 8A10.003 10.003 0 0012 2C6.815 2 2.55 5.947 2.05 11" stroke="currentColor"
-                          strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M17 8h4.4a.6.6 0 00.6-.6V3M2.881 16c1.544 3.532 5.068 6 9.168 6 5.186 0 9.45-3.947 9.951-9"
-                          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7.05 16h-4.4a.6.6 0 00-.6.6V21" stroke="currentColor" strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              }
+              <button
+                onClick={() => onForceSync()}
+                className="
+                  w-12 h-full rounded flex justify-center items-center
+                  bg-gray-100 hover:bg-gray-300
+                "
+              >
+                <svg
+                  className={`w-6 h-6 ${syncStatus.some(s => s.status === 'SYNCING') ? "animate-spin" : ""}`}
+                  strokeWidth="1.5" viewBox="0 0 24 24" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21.168 8A10.003 10.003 0 0012 2C6.815 2 2.55 5.947 2.05 11" stroke="currentColor"
+                        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 8h4.4a.6.6 0 00.6-.6V3M2.881 16c1.544 3.532 5.068 6 9.168 6 5.186 0 9.45-3.947 9.951-9"
+                        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7.05 16h-4.4a.6.6 0 00-.6.6V21" stroke="currentColor" strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"/>
+                </svg>
+              </button>
               <button
                 onClick={() => onAddNote()}
                 className="
