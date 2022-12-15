@@ -12,6 +12,8 @@
 - Sync notes with Google Drive
 - Export note as image
 - Export note in GeoJSON format
+- Offline-first: maps and notes are available also when you are offline
+- Progressive Web App: install as a regular application
 
 ### Contributing, feedback, suggestions
 
