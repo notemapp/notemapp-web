@@ -1,6 +1,6 @@
 ## Notemapp - Take notes on a map
 
-![Screenshot](https://kvqvxdvekivrhrrehlse.supabase.co/storage/v1/object/public/assets/screenshot?t=2022-12-14T20%3A05%3A12.576Z)
+![Screenshot](https://res.cloudinary.com/dfg0d7qcq/image/upload/v1676046906/screenshot_rcp9zo.png)
 
 ### Features
 
